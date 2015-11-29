@@ -1,0 +1,56 @@
+body .container h1,body .container h2,body .container h3,body .container h4,body .container h5,body .container h6
+{
+	color: #00B2E6;
+}
+body .container
+{
+	color: #738189;
+}
+.barra_navegacion
+{
+	background-color: rgb(50,50,50);
+	/*opacity: 0.50;
+	-moz-opacity: 0.50;
+	filter: alpha(opacity=50);*/
+	overflow: visible;
+	height: 80px;
+	position: relative;
+	margin-bottom: 0px;
+}
+.logo_simma
+{
+	vertical-align: middle;
+	height: 55px;
+	border: none;
+	display: inline-block;
+	margin-top: 15px;
+}
+.menu_principal
+{
+	margin-top: 25px;
+}
+.fuente_reducida
+{
+	font-size: 75%;
+}
+
+.menuCreacion th
+{
+	text-align: left;
+}
+.menuCreacion td
+{
+	text-align: center;
+	padding-bottom: 5px;
+}
+@media print
+{
+	div.barra_navegacion, div.btn-toolbar.pull-right
+	{
+		display: none;
+	}
+	div.container
+	{
+		font-size: 10px;
+	}
+}

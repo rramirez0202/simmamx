@@ -1,0 +1,277 @@
+.manifiestoView, .manifiestoView *
+{
+	margin: 0px;
+	padding: 0px;
+}
+.manifiestoView
+{
+	position: absolute;
+}
+.manifiestoViewPrint
+{
+	position: absolute;
+	font-family: monospace;
+	font-size: 10px;
+	top: 0px;
+	left: 0px;
+}
+@media screen
+{
+	.manifiestoViewScreen
+	{
+		display: block;
+	}
+	.manifiestoViewPrint
+	{
+		display: block;
+	}
+}
+@media print
+{
+	.manifiestoViewScreen
+	{
+		display: none;
+	}
+	.manifiestoViewPrint
+	{
+		display: block;
+		top: -5px;
+	}
+}
+.manifiestoPage
+{
+	border: 1px silver solid;
+	width: 21.59cm;
+	height: 27.94cm;
+	padding: 0.5cm 1cm 1cm 1cm;
+	font-family: Arial, Verdana;
+	font-size: 8pt;
+}
+.logo01
+{
+	border: 0px;
+	width: 3.83cm;
+	height: 2.13cm;
+	top: 0px;
+	left: 0px;
+	position: absolute;
+}
+.encabezado01, .encabezado02
+{
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+.encabezado02
+{
+	margin-top: 15px;
+}
+.clientegenerador
+{
+	position: absolute;
+	top: 75px;
+	left: 600px;
+}
+.manifiestoCuerpo
+{
+	border: 2px solid black;
+	empty-cells: show;
+	border-collapse: collapse;
+	width: 100%;
+}
+.manifiestoCuerpo th.manifiestoSeccion
+{
+	border: 2px solid black;
+	text-transform: uppercase;
+	padding: 5px;
+	width: 15px;
+}
+.manifiestoCuerpo td
+{
+	border: 2px solid black;
+	vertical-align: top;
+}
+table.manifiestoCuerpo table.dataTable
+{
+	border: none;
+	width: 100%;
+	empty-cells: show;
+	border-collapse: separate;
+	border-spacing: 1px;
+}
+table.manifiestoCuerpo table.dataTable td, table.manifiestoCuerpo table.dataTable th
+{
+	border: 1px solid black;
+	vertical-align: top;
+	padding: 1px;
+}
+table.manifiestoCuerpo table.dataTable th
+{
+	font-weight: normal;
+	vertical-align: middle;
+	text-align: center;
+}
+table.manifiestoCuerpo table.dataTable td span
+{
+	display: inline-block;
+}
+.manifiestoViewPrint div
+{
+	border: 1px solid white;
+	color: blue;
+	position: absolute;
+	overflow: hidden;
+    font-size: 9pt;
+    font-weight: normal;
+}
+@media print
+{
+	.manifiesto_space_nocte						{	top: 0060px;	left: 0020px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_nogen						{	top: 0090px;	left: 0020px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_nrg						{	top: 0145px;	left: 0000px;	width: 450px;	height: 18px;	}
+	.manifiesto_space_nomanifiesto				{	top: 0145px;	left: 0465px;	width: 145px;	height: 18px;	}
+	.manifiesto_space_pagina					{	top: 0145px;	left: 0625px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_generedorrazonsocial		{	top: 0165px;	left: 0270px;	width: 455px;	height: 18px;	}
+	.manifiesto_space_generadordocimicilio		{	top: 0187px;	left: 0065px;	width: 660px;	height: 18px;	}
+	.manifiesto_space_generadordelegacion		{	top: 0210px;	left: 0140px;	width: 200px;	height: 18px;	}
+	.manifiesto_space_generadorcp				{	top: 0210px;	left: 0380px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_generadoredo				{	top: 0210px;	left: 0590px;	width: 120px;	height: 18px;	}
+	.manifiesto_space_generadortel				{	top: 0233px;	left: 0020px;	width: 140px;	height: 18px;	}
+	.manifiesto_space_generadorreferencias		{	top: 0233px;	left: 0260px;	width: 470px;	height: 18px;	}
+	.manifiesto_space_instrucciones				{	top: 0500px;	left: 0000px;	width: 725px;	height: 18px;	}
+	.manifiesto_space_cccontenedorcap			{	top: 0320px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_cccontenedortipo			{	top: 0320px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_cccantidad				{	top: 0320px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_ccunidad					{	top: 0320px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_punzcontenedorcap			{	top: 0345px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_punzcontenedortipo		{	top: 0345px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_punzcantidad				{	top: 0345px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_punzunidad				{	top: 0345px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_patcontenedorcap			{	top: 0365px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_patcontenedortipo			{	top: 0365px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_patcantidad				{	top: 0365px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_patunidad					{	top: 0365px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_noanatcontenedorcap		{	top: 0390px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_noanatcontenedortipo		{	top: 0390px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_noanatcantidad			{	top: 0390px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_noanatunidad				{	top: 0390px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_sangrecontenedorcap		{	top: 0415px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_sangrecontenedortipo		{	top: 0415px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_sangecantidad				{	top: 0415px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_sangreunidad				{	top: 0415px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_otrocontenedorcap			{	top: 0435px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_otrocontenedortipo		{	top: 0435px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_otrocantidad				{	top: 0435px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_otrounidad				{	top: 0435px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_totalcontenedorcap		{	top: 0460px;	left: 0350px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_totalcontenedortipo		{	top: 0460px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_totalcantidad				{	top: 0460px;	left: 0535px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_totalunidad				{	top: 0460px;	left: 0635px;	width: 095px;	height: 18px;	}
+	.manifiesto_space_cetificacion				{	top: 0580px;	left: 0155px;	width: 615px;	height: 18px;	}
+	.manifiesto_space_transprazonsoc			{	top: 0605px;	left: 0260px;	width: 460px;	height: 18px;	}
+	.manifiesto_space_transpdocimicilio			{	top: 0625px;	left: 0060px;	width: 360px;	height: 18px;	}
+	.manifiesto_space_transptel					{	top: 0625px;	left: 0465px;	width: 150px;	height: 18px;	}
+	.manifiesto_space_transpautsemarnat			{	top: 0645px;	left: 0180px;	width: 075px;	height: 18px;	}
+	.manifiesto_space_transpregsct				{	top: 0645px;	left: 0400px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_transpoperadornombre		{	top: 0680px;	left: 0055px;	width: 275px;	height: 18px;	}
+	.manifiesto_space_transpoperadorfirma		{	top: 0680px;	left: 0385px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_transpoperadorcargo		{	top: 0700px;	left: 0055px;	width: 275px;	height: 18px;	}
+	.manifiesto_space_transpfecha				{	top: 0700px;	left: 0470px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_transpruta				{	top: 0740px;	left: 0000px;	width: 550px;	height: 18px;	}
+	.manifiesto_space_transpvahiculotipo		{	top: 0765px;	left: 0120px;	width: 210px;	height: 18px;	}
+	.manifiesto_space_transpvahiculoplaca		{	top: 0765px;	left: 0420px;	width: 150px;	height: 18px;	}
+	.manifiesto_space_dest_razonsoc				{	top: 0795px;	left: 0240px;	width: 490px;	height: 18px;	}
+	.manifiesto_space_dest_nautsemarnat			{	top: 0820px;	left: 0250px;	width: 480px;	height: 18px;	}
+	.manifiesto_space_dest_domicilio			{	top: 0840px;	left: 0055px;	width: 675px;	height: 18px;	}
+	.manifiesto_space_dest_recibido				{	top: 0870px;	left: 0310px;	width: 425px;	height: 18px;	}
+	.manifiesto_space_dest_observaciones		{	top: 0890px;	left: 0090px;	width: 630px;	height: 18px;	}
+	.manifiesto_space_dest_nombre				{	top: 0935px;	left: 0060px;	width: 370px;	height: 18px;	}
+	.manifiesto_space_dest_cargo                {   top: 0935px;    left: 0490px;   width: 225px;   height: 18px;   }
+	.manifiesto_space_dest_firma				{	top: 0960px;	left: 0060px;	width: 375px;	height: 18px;	}
+	.manifiesto_space_dest_fecha				{	top: 0960px;	left: 0580px;	width: 150px;	height: 18px;	}
+}
+@media screen
+{
+	.manifiesto_space_nocte						{	top: 0070px;	left: 0650px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_nogen						{	top: 0090px;	left: 0650px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_nrg						{	top: 0145px;	left: 0065px;	width: 450px;	height: 18px;	}
+	.manifiesto_space_nomanifiesto				{	top: 0145px;	left: 0525px;	width: 145px;	height: 18px;	}
+	.manifiesto_space_pagina					{	top: 0145px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_generedorrazonsocial		{	top: 0162px;	left: 0330px;	width: 440px;	height: 18px;	}
+	.manifiesto_space_generadordocimicilio		{	top: 0177px;	left: 0125px;	width: 645px;	height: 18px;	}
+	.manifiesto_space_generadordelegacion		{	top: 0192px;	left: 0210px;	width: 200px;	height: 18px;	}
+	.manifiesto_space_generadorcp				{	top: 0192px;	left: 0440px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_generadoredo				{	top: 0192px;	left: 0670px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_generadortel				{	top: 0207px;	left: 0090px;	width: 140px;	height: 18px;	}
+	.manifiesto_space_generadorreferencias		{	top: 0207px;	left: 0315px;	width: 455px;	height: 18px;	}
+	.manifiesto_space_instrucciones				{	top: 0422px;	left: 0065px;	width: 700px;	height: 18px;	}
+	.manifiesto_space_cccontenedorcap			{	top: 0270px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_cccontenedortipo			{	top: 0270px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_cccantidad				{	top: 0270px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_ccunidad					{	top: 0270px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_punzcontenedorcap			{	top: 0290px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_punzcontenedortipo		{	top: 0290px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_punzcantidad				{	top: 0290px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_punzunidad				{	top: 0290px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_patcontenedorcap			{	top: 0310px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_patcontenedortipo			{	top: 0310px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_patcantidad				{	top: 0310px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_patunidad					{	top: 0310px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_noanatcontenedorcap		{	top: 0330px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_noanatcontenedortipo		{	top: 0330px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_noanatcantidad			{	top: 0330px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_noanatunidad				{	top: 0330px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_sangrecontenedorcap		{	top: 0350px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_sangrecontenedortipo		{	top: 0350px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_sangecantidad				{	top: 0350px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_sangreunidad				{	top: 0350px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_otrocontenedorcap			{	top: 0370px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_otrocontenedortipo		{	top: 0370px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_otrocantidad				{	top: 0370px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_otrounidad				{	top: 0370px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_totalcontenedorcap		{	top: 0390px;	left: 0445px;	width: 070px;	height: 18px;	}
+	.manifiesto_space_totalcontenedortipo		{	top: 0390px;	left: 0525px;	width: 025px;	height: 18px;	}
+	.manifiesto_space_totalcantidad				{	top: 0390px;	left: 0558px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_totalunidad				{	top: 0390px;	left: 0680px;	width: 090px;	height: 18px;	}
+	.manifiesto_space_cetificacion				{	top: 0487px;	left: 0205px;	width: 550px;	height: 18px;	}
+	.manifiesto_space_transprazonsoc			{	top: 0517px;	left: 0315px;	width: 450px;	height: 18px;	}
+	.manifiesto_space_transpdocimicilio			{	top: 0532px;	left: 0125px;	width: 360px;	height: 18px;	}
+	.manifiesto_space_transptel					{	top: 0532px;	left: 0510px;	width: 150px;	height: 18px;	}
+	.manifiesto_space_transpautsemarnat			{	top: 0547px;	left: 0250px;	width: 075px;	height: 18px;	}
+	.manifiesto_space_transpregsct				{	top: 0547px;	left: 0460px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_transpoperadornombre		{	top: 0597px;	left: 0115px;	width: 275px;	height: 18px;	}
+	.manifiesto_space_transpoperadorfirma		{	top: 0597px;	left: 0445px;	width: 170px;	height: 18px;	}
+	.manifiesto_space_transpoperadorcargo		{	top: 0612px;	left: 0110px;	width: 275px;	height: 18px;	}
+	.manifiesto_space_transpfecha				{	top: 0612px;	left: 0530px;	width: 100px;	height: 18px;	}
+	.manifiesto_space_transpruta				{	top: 0642px;	left: 0065px;	width: 550px;	height: 18px;	}
+	.manifiesto_space_transpvahiculotipo		{	top: 0662px;	left: 0185px;	width: 210px;	height: 18px;	}
+	.manifiesto_space_transpvahiculoplaca		{	top: 0662px;	left: 0480px;	width: 150px;	height: 18px;	}
+	.manifiesto_space_dest_razonsoc				{	top: 0700px;	left: 0310px;	width: 450px;	height: 18px;	}
+	.manifiesto_space_dest_nautsemarnat			{	top: 0730px;	left: 0320px;	width: 440px;	height: 18px;	}
+	.manifiesto_space_dest_domicilio			{	top: 0760px;	left: 0130px;	width: 635px;	height: 18px;	}
+	.manifiesto_space_dest_recibido				{	top: 0795px;	left: 0380px;	width: 385px;	height: 18px;	}
+	.manifiesto_space_dest_observaciones		{	top: 0825px;	left: 0160px;	width: 610px;	height: 18px;	}
+	.manifiesto_space_dest_nombre				{	top: 0860px;	left: 0120px;	width: 370px;	height: 18px;	}
+	.manifiesto_space_dest_cargo                {   top: 0860px;    left: 0550px;   width: 215px;   height: 18px;   }
+	.manifiesto_space_dest_firma				{	top: 0890px;	left: 0105px;	width: 375px;	height: 18px;	}
+	.manifiesto_space_dest_fecha				{	top: 0890px;	left: 0635px;	width: 125px;	height: 18px;	}
+}
+
+.manifiestoViewPrint div.manifiesto_space_transpautsemarnat
+{
+	/*font-size: 95%;*/
+}
+
+.manifiesto_space_instrucciones, .manifiesto_space_cccontenedorcap, .manifiesto_space_cccontenedortipo, .manifiesto_space_cccantidad, .manifiesto_space_ccunidad,
+.manifiesto_space_punzcontenedorcap, .manifiesto_space_punzcontenedortipo, .manifiesto_space_punzcantidad, .manifiesto_space_punzunidad,
+.manifiesto_space_patcontenedorcap, .manifiesto_space_patcontenedortipo, .manifiesto_space_patcantidad, .manifiesto_space_patunidad,
+.manifiesto_space_noanatcontenedorcap, .manifiesto_space_noanatcontenedortipo, .manifiesto_space_noanatcantidad, .manifiesto_space_noanatunidad,
+.manifiesto_space_sangrecontenedorcap, .manifiesto_space_sangrecontenedortipo, .manifiesto_space_sangecantidad, .manifiesto_space_sangreunidad,
+.manifiesto_space_otrocontenedorcap, .manifiesto_space_otrocontenedortipo, .manifiesto_space_otrocantidad, .manifiesto_space_otrounidad,
+.manifiesto_space_totalcontenedorcap, .manifiesto_space_totalcontenedortipo, .manifiesto_space_totalcantidad, .manifiesto_space_totalunidad,
+.manifiesto_space_cetificacion, .manifiesto_space_transpoperadorfirma, .manifiesto_space_transpfecha,
+.manifiesto_space_transpruta, .manifiesto_space_dest_recibido, .manifiesto_space_dest_observaciones, .manifiesto_space_dest_nombre, 
+.manifiesto_space_dest_firma, .manifiesto_space_dest_cargo, .manifiesto_space_dest_fecha
+{
+	visibility: hidden;
+}
