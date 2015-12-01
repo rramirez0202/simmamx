@@ -558,8 +558,7 @@ class Modcliente extends CI_Model
 			if($idsucursal!=0) $this->setIdsucursal($idsucursal);
 			else return "";
 		}
-		$this->db->select_max('identificador');
-		$regs=$this->db->get('cliente');
+		$regs=$this->db->query("SELECT MAX(CONVERT(identificador,UNSIGNED)) AS identificador FROM (`cliente`)");
 		$max=($regs->num_rows()>0?intval($regs->row_array()["identificador"]):0);
 		$total=$this->db->count_all('cliente');
 		if($total>$max) $max=$total;

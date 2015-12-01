@@ -54,3 +54,16 @@ body .container
 		font-size: 10px;
 	}
 }
+
+table.Reporte
+{
+	font-size: smaller;
+}
+table.Reporte th
+{
+	text-align: left;
+}
+#parametros
+{
+	display: none;
+}

@@ -341,6 +341,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modgenerador');
 		$this->load->model('modmanifiesto');
 		$this->load->model('modruta');
+		$this->load->model('modsucursal');
 		$cte=$this->input->post('cliente');
 		$gen=$this->input->post('generador');
 		$ruta=$this->input->post('ruta');
@@ -377,6 +378,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modgenerador');
 		$this->load->model('modmanifiesto');
 		$this->load->model('modruta');
+		$this->load->model('modsucursal');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$this->modruta->getFromDatabase($ruta);
@@ -396,6 +398,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modgenerador');
 		$this->load->model('modmanifiesto');
 		$this->load->model('modruta');
+		$this->load->model('modsucursal');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$fecha=$this->input->post('fecha');
@@ -416,6 +419,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modcliente');
 		$this->load->model('modgenerador');
 		$this->load->model('modmanifiesto');
+		$this->load->model('modsucursal');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$fecha=$this->input->post('fecha');
@@ -729,6 +733,10 @@ class Manifiestos extends CI_Controller
 			array_push($data,$idmanifiesto);
 		}
 		echo json_encode($data);
+	}
+	public function menucrearreporte()
+	{
+		$this->load->view('manifiestos/menureportes');
 	}
 }
 ?>

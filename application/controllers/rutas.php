@@ -344,5 +344,9 @@ class Rutas extends CI_Controller
 			),true);
 		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
 	}
+	public function menucrearreporte()
+	{
+		$this->load->view('rutas/menureportes');
+	}
 }
 ?>

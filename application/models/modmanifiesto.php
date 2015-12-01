@@ -198,11 +198,12 @@ class ModManifiesto extends CI_Model
 			$this->modgenerador->getFromDatabase();
 			$idsuc=$this->modgenerador->getIdsucursal();
 		}
-		$this->db->select('MAX(CAST(identificador AS UNSIGNED)) AS identificador');
-		//$this->db->where("idmanifiesto in (select idmanifiesto from relgenman where idgenerador in (select idgenerador from relcligen where idcliente in (select idcliente from relsuccli where idsucursal = $idsuc)))");
-		$regs=$this->db->get('manifiesto');
+		$suc=new Modsucursal();
+		$suc->setIdsucursal($idsuc);
+		$suc->getFromDatabase();
+		$regs=$this->db->query("SELECT MAX(CAST(REPLACE( identificador, '{$suc->getIniciales()}', '') AS UNSIGNED)) AS identificador FROM (`manifiesto`) WHERE `identificador` like '{$suc->getIniciales()}%'");
 		$max=($regs->num_rows()>0?intval($regs->row_array()["identificador"]):0);
-		return $max+1;
+		return $suc->getIniciales().($max+1);
 	}
 	public function getAll($idsucursal,$filtros)
 	{

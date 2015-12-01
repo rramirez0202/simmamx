@@ -54,7 +54,10 @@ $generador=new Modgenerador();
 							<td><input type="checkbox" id="frm_validacion_manifiesto[]" name="frm_validacion_manifiesto[]" checked="checked" value="<?= $generador->getIdgenerador()."|".$identificador; ?>" /></td>
 						</tr>
 						<?php
-						$identificador++;
+						$sucAux=new Modsucursal();
+						$sucAux->getFromDatabase($idsucursal);
+						$identificador=str_replace($sucAux->getIniciales(),"",$identificador)+1;
+						$identificador=$sucAux->getIniciales().$identificador;
 					}
 				}
 				?>
