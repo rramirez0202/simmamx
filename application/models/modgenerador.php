@@ -623,9 +623,7 @@ class Modgenerador extends CI_Model
 			if($idcliente!=0) $this->setIdcliente($idcliente);
 			else return "";
 		}
-		$this->db->select_max('identificador');
-		$this->db->where("idgenerador in (select idgenerador from relcligen where idcliente = {$this->idcliente})");
-		$regs=$this->db->get('generador');
+		$regs=$this->db->query("SELECT MAX(CONVERT(identificador,UNSIGNED)) AS identificador FROM (`generador`) WHERE `idgenerador` in (select idgenerador from relcligen where idcliente = {$this->idcliente})");
 		$max=($regs->num_rows()>0?intval($regs->row_array()["identificador"]):0);
 		return $max+1;
 	}

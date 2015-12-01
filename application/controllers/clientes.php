@@ -702,5 +702,9 @@ class Clientes extends CI_Controller
 		else
 			echo "No existe el archivo $archivo";
 	}
+	public function menucrearreporte()
+	{
+		$this->load->view('clientes/menureportes');
+	}
 }
 ?>
