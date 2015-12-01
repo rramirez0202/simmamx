@@ -6,6 +6,11 @@
 			<button type="button" class="btn btn-default" title="Nueva Ruta" onclick="location.href='<?= base_url('rutas/nuevo/'.$idempresa.'/'.$idsucursal);?>';">
 				<span class="glyphicon glyphicon-list-alt"></span>
 			</button>
+			<?php endif; 
+			if($this->modsesion->hasPermisoHijo(102)): ?>
+			<button type="button" class="btn btn-default" title="Generar Reportes" onclick="Ruta.FrmReporte()">
+				<span class="glyphicon glyphicon-book"></span>
+			</button>
 			<?php endif; ?>
 		</div>
 	</div>
