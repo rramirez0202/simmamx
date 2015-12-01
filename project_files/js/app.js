@@ -813,6 +813,20 @@ function fnRuta()
 			Mensaje("Error al generar datos de plan de recolección: "+mensaje+"<br />"+jqXHRObj.responseText);
 		});
 	}
+	this.FrmReporte=function()
+	{
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"rutas/menucrearreporte",
+			cache:	false
+		});
+		ajx.done(function(resp){
+			Mensaje(resp);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			Mensaje("Error al cargar el menu: "+mensaje+"<br />"+jqXHRObj.responseText);
+		});
+	}
 }
 
 function fnCliente()
@@ -975,6 +989,20 @@ function fnCliente()
 	{
 		var nodo=$("#facturacion"+idFacturacion)[0];
 		nodo.parentNode.removeChild(nodo);
+	}
+	this.FrmReporte=function()
+	{
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"clientes/menucrearreporte",
+			cache:	false
+		});
+		ajx.done(function(resp){
+			Mensaje(resp);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			Mensaje("Error al cargar el menu: "+mensaje+"<br />"+jqXHRObj.responseText);
+		});
 	}
 }
 
@@ -1564,6 +1592,20 @@ function fnManifiesto()
 		});
 		ajx.fail(function(jqXHRObj,mensaje){
 			Mensaje("Error al almacenar captura de residuos: "+mensaje+"<br />"+jqXHRObj.responseText);
+		});
+	}
+	this.FrmReporte=function()
+	{
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"manifiestos/menucrearreporte",
+			cache:	false
+		});
+		ajx.done(function(resp){
+			Mensaje(resp);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			Mensaje("Error al cargar el menu: "+mensaje+"<br />"+jqXHRObj.responseText);
 		});
 	}
 }
@@ -2293,6 +2335,61 @@ function fnBitacora()
 	}
 }
 
+function fnReporte()
+{
+	this.Ejecutar=function()
+	{
+		Mensaje("Generando Reporte");
+		$("#bodyreport").html("");
+		var ajx=$.ajax({
+			method	: "POST",
+			url		: baseURL+"reporte/ejecutar",
+			cache	: false,
+			data	: $("#frm_reporte").serialize()
+		});
+		ajx.done(function(resp){
+			$.msg('unblock',10,3);
+			$("#bodyreport").html(resp);
+			$('#btnDescarga').removeClass('disabled');
+			$('#btnDescarga').attr('disabled', '');
+			$('#btnDescarga').prop('disabled', false);
+			if($("#reporttable").length>0 && $("#reporttablebody")[0].rows.length>0)
+			{
+				$("#reporttable").DataTable();
+			}
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				Mensaje("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText);
+			},500);
+		});
+	}
+	this.Descargar=function()
+	{
+		Mensaje("Generando Reporte");
+		var ajx=$.ajax({
+			method	: "POST",
+			url		: baseURL+"reporte/exportar",
+			cache	: false,
+			data	: $("#frm_reporte").serialize()
+		});
+		ajx.done(function(resp){
+			$.msg('unblock',10,3);
+			if(resp.length>250)
+				setTimeout(function(){Alert(resp,function(){return true;});},500);
+			else
+				location.href=resp;
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				Mensaje("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText);
+			},500);
+		});
+	}
+}
+
 var Empresa		= new fnEmpresa();
 var Sucursal	= new fnSucursal();
 var Operador	= new fnOperador();
@@ -2309,6 +2406,7 @@ var Perfil		= new fnPerfil();
 var Usuario		= new fnUsuario();
 var Calendario	= new fnCalendario();
 var Bitacora	= new fnBitacora();
+var Reporte		= new fnReporte();
 
 $.extend(true, $.fn.dataTable.defaults, {
 	"scrollY": 400,
