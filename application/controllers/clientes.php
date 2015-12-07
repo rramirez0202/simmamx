@@ -452,6 +452,9 @@ class Clientes extends CI_Controller
 									case 'BA':
 									    $objeto->setCobranzacp($celda->nodeValue);
 									    break;
+									case 'BB':
+										$objeto->setReferenciabancaria($celda->nodeValue);
+										break;
 								}
 							}
 							$fac->addToDatabase();
@@ -668,6 +671,9 @@ class Clientes extends CI_Controller
 									case 'BC':
 									    $objeto->setCobranzacp($celda->nodeValue);
 									    break;
+									case 'BD':
+										$objeto->setGiro($celda->nodeValue);
+										break;
 								}
 							}
 							$fac->addToDatabase();

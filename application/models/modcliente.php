@@ -52,6 +52,7 @@ class Modcliente extends CI_Model
 	private $facturaciones;
 	private $status;
 	private $fechastatus;
+	private $referenciabancaria;
 	public function __construct()
 	{
 		parent::__construct();
@@ -106,6 +107,7 @@ class Modcliente extends CI_Model
 		$this->facturaciones=array();
 		$this->status="";
 		$this->fechastatus="";
+		$this->referenciabancaria="";
 	}
 	public function getIdcliente() { return $this->idcliente; }
 	public function getIdentificador() { return $this->identificador; }
@@ -158,6 +160,7 @@ class Modcliente extends CI_Model
 	public function getFacturaciones() { return $this->facturaciones; }
 	public function getStatus() { return $this->status; }
 	public function getFechastatus() { return $this->fechastatus; }
+	public function getReferenciabancaria() { return $this->referenciabancaria; }
 	public function setIdcliente($valor) { $this->idcliente= intval($valor); }
 	public function setIdentificador($valor) { $this->identificador= "".$valor; }
 	public function setRazonsocial($valor) { $this->razonsocial= "".$valor; }
@@ -209,6 +212,7 @@ class Modcliente extends CI_Model
 	public function setFacturaciones($valor) { if(is_array($valor)) $this->facturaciones=$valor; else array_push($this->facturaciones,$valor); }
 	public function setStatus($valor) { $this->status= "".$valor; }
 	public function setFechastatus($valor) { $this->fechastatus= "".$valor; }
+	public function setReferenciabancaria($valor) { $this->referenciabancaria= "".$valor; }
 	public function getFromDatabase($id=0)
 	{
 		if($this->idcliente==""||$this->idcliente==0)
@@ -272,6 +276,7 @@ class Modcliente extends CI_Model
 		$this->setCobranzaextension2($reg["cobranzaextension2"]);
 		$this->setStatus($reg["status"]);
 		$this->setFechastatus($reg["fechastatus"]);
+		$this->setReferenciabancaria($reg["referenciabancaria"]);
 		$this->db->where('idcliente',$this->idcliente);
 		$regs=$this->db->get('relsuccli');
 		if($regs->num_rows()>0)
@@ -341,6 +346,7 @@ class Modcliente extends CI_Model
 		$this->setFacturaciones($this->input->post("frm_cliente_facturaciones"));
 		$this->setStatus($this->input->post("frm_cliente_status"));
 		$this->setFechastatus($this->input->post("frm_cliente_fechastatus"));
+		$this->setReferenciabancaria($this->input->post("frm_cliente_referenciabancaria"));
 		return true;
 	}
 	public function addToDatabase()
@@ -393,7 +399,8 @@ class Modcliente extends CI_Model
 			"cobranzatelefono2"=>$this->cobranzatelefono2,
 			"cobranzaextension2"=>$this->cobranzaextension2,
 			"status"=>$this->status,
-			"fechastatus"=>$this->fechastatus
+			"fechastatus"=>$this->fechastatus,
+			"referenciabancaria"=>$this->referenciabancaria
 		);
 		if($this->identificador==""||$this->razonsocial==""||$this->idsucursal==0)
 			return false;
@@ -463,7 +470,8 @@ class Modcliente extends CI_Model
 			"cobranzatelefono2"=>$this->cobranzatelefono2,
 			"cobranzaextension2"=>$this->cobranzaextension2,
 			"status"=>$this->status,
-			"fechastatus"=>$this->fechastatus
+			"fechastatus"=>$this->fechastatus,
+			"referenciabancaria"=>$this->referenciabancaria
 		);
 		$this->db->where('idcliente',$this->idcliente);
 		$this->db->update('cliente',$data);

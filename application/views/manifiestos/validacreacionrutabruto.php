@@ -17,6 +17,9 @@ $generador=new Modgenerador();
 			<p class="form-control-static"><?= $bitacora ?></p>
 		</div>
 	</div>
+	<div class="form-group">
+		<div class="col-sm-6"></div>
+	</div>
 	<div class="table-responsive">
 		<table class="table table-striped table-hover">
 			<thead>

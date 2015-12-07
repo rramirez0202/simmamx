@@ -42,7 +42,7 @@ $sucursal->getFromDatabase();
 			<?php endif; ?>
 		</div>
 	</div>
-	<h3>Manifiesto <small><?= $manifiesto->getIdentificador(); ?></small></h3>
+	<h3>Manifiesto <small><?= $manifiesto->getIdentificador().($manifiesto->getNoexterno()!=""?" (No. Externo: {$manifiesto->getNoexterno()})":""); ?></small></h3>
 	<form class="form-horizontal" role="form" id="frm_manifiesto">
 		<h5>Generador</h5>
 		<div class="form-group">

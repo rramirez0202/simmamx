@@ -130,7 +130,8 @@ class Manifiestos extends CI_Controller
 	}
 	public function vistapreimpresion($idmanifiesto,$imprimir)
 	{
-		$this->load->model("modmanifiesto");
+		$this->creaXMLManifiesto($idmanifiesto);
+		/*$this->load->model("modmanifiesto");
 		$this->load->model("modgenerador");
 		$this->load->model("modcliente");
 		$this->load->model("modruta");
@@ -178,7 +179,7 @@ class Manifiestos extends CI_Controller
 			"vehiculo"=>$this->modvehiculo,
 			"recoleccion"=>$recoleccion
 			),true);
-		$this->load->view('html/html',array("head"=>$head,"body"=>$body));	
+		$this->load->view('html/html',array("head"=>$head,"body"=>$body));*/	
 	}
 	public function vistacamposconnombre()
 	{
@@ -379,6 +380,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modmanifiesto');
 		$this->load->model('modruta');
 		$this->load->model('modsucursal');
+		$this->load->model('modbitacora');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$this->modruta->getFromDatabase($ruta);
@@ -399,6 +401,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modmanifiesto');
 		$this->load->model('modruta');
 		$this->load->model('modsucursal');
+		$this->load->model('modbitacora');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$fecha=$this->input->post('fecha');
@@ -460,6 +463,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modmanifiesto');
 		$this->load->model('modbitacora');
 		$this->load->model('modruta');
+		$this->load->model('modsucursal');
 		$idruta=$this->input->post('frm_validacion_idruta');
 		$nombreBitacora=$this->input->post('frm_validacion_bitacora');
 		$manifiestos=$this->input->post('frm_validacion_manifiesto');
@@ -475,9 +479,13 @@ class Manifiestos extends CI_Controller
 			$this->modruta->getFromDatabase($idruta);
 			$this->modmanifiesto->setIdruta($idruta);
 			$this->modbitacora->setIdsucursal($this->modruta->getIdSucursal());
+			$this->modbitacora->setIdentificador($this->modbitacora->nextIdentificador($this->modruta->getIdSucursal()));
 		}
 		else
+		{
 			$this->modbitacora->setIdsucursal($this->input->post("frm_validacion_idsucursal"));
+			$this->modbitacora->setIdentificador($this->modbitacora->nextIdentificador($this->input->post("frm_validacion_idsucursal")));
+		}
 		if($manifiestos!==false) foreach($manifiestos as $man)
 		{
 			$data=explode("|",$man);
@@ -593,7 +601,8 @@ class Manifiestos extends CI_Controller
 				"ventas"=>$this->modcatalogo->getCatalogo(8),
 				"cliente"=>$this->modcatalogo->getCatalogo(11)
 				),
-			"motivo"=>$this->modmanifiesto->getMotivo()
+			"motivo"=>$this->modmanifiesto->getMotivo(),
+			"noexterno"=>$this->modmanifiesto->getNoexterno()
 			));
 	}
 	public function eliminar($id)
@@ -623,6 +632,7 @@ class Manifiestos extends CI_Controller
 		$this->modcliente->setIdcliente($this->modgenerador->getIdcliente());
 		$this->modcliente->getFromDatabase();
 		$this->modmanifiesto->setMotivo($this->input->post('frm_motivo'));
+		$this->modmanifiesto->setNoexterno($this->input->post('frm_noexterno'));
 		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
 		$recoleccionesActual=$this->modmanifiesto->getRecoleccionesDatabase();
 		if($recoleccionesActual!==false) foreach($recoleccionesActual as $rec)
@@ -721,7 +731,8 @@ class Manifiestos extends CI_Controller
 					"ventas"=>$this->modcatalogo->getCatalogo(8),
 					"cliente"=>$this->modcatalogo->getCatalogo(11)
 					),
-				"motivo"=>$this->modmanifiesto->getMotivo()
+				"motivo"=>$this->modmanifiesto->getMotivo(),
+				"noexterno"=>$this->modmanifiesto->getNoexterno()
 				),true);
 			array_push($data,$this->modgenerador->getIdGenerador());
 			array_push($data,$this->modgenerador->getRazonSocial());
@@ -737,6 +748,326 @@ class Manifiestos extends CI_Controller
 	public function menucrearreporte()
 	{
 		$this->load->view('manifiestos/menureportes');
+	}
+	private function creaNodoXML(DOMDocument $xml,$idmanifiesto)
+	{
+		$this->load->model("modmanifiesto");
+		$this->load->model("modgenerador");
+		$this->load->model("modcliente");
+		$this->load->model("modruta");
+		$this->load->model("modempresa");
+		$this->load->model("modsucursal");
+		$this->load->model("modoperador");
+		$this->load->model("modvehiculo");
+		$this->load->model("modresiduo");
+		$this->load->model("modrecoleccion");
+		$manifiesto	= new Modmanifiesto();
+		$generador	= new Modgenerador();
+		$cliente	= new Modcliente();
+		$empresa	= new Modempresa();
+		$sucursal	= new Modsucursal();
+		$ruta		= new Modruta();
+		$operador	= new Modoperador();
+		$vehiculo	= new Modvehiculo();
+		$manifiesto->getFromDatabase($idmanifiesto);
+		$generador->getFromDatabase($manifiesto->getIdgenerador());
+		$cliente->getFromDatabase($generador->getIdcliente());
+		$ruta->getFromDatabase($manifiesto->getIdruta());
+		$operador->getFromDatabase($ruta->getIdoperador());
+		$vehiculo->getFromDatabase($ruta->getIdvehiculo());
+		$recoleccion=array();
+		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+		if($residuos!==false) foreach($residuos as $res)
+		{
+			$recol=$this->modrecoleccion->getRecoleccionWithIdResiduo($idmanifiesto,$res["idresiduo"]);
+			if($recol!==false)
+			{
+				$recoleccion[$res["nom052"]]=$recol;
+			}
+			else
+				$recoleccion[$res["nom052"]]=false;
+		}
+		$nodoManifiesto=$xml->createElement("manifiesto");
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_nocte");
+		$elem->appendChild($xml->createCDATASection($cliente->getIdentificador()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_nogen");
+		$elem->appendChild($xml->createCDATASection($generador->getIdentificador()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_nrg");
+		$elem->appendChild($xml->createCDATASection($generador->getNumregamb()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_nomanifiesto");
+		$elem->appendChild($xml->createCDATASection($manifiesto->getIdentificador()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_pagina");
+		$elem->appendChild($xml->createCDATASection("1 / 1"));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generedorrazonsocial");
+		$elem->appendChild($xml->createCDATASection($generador->getRazonsocial()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadordocimicilio");
+		$elem->appendChild($xml->createCDATASection($generador->getCalle().", ".$generador->getNumexterior().($generador->getNuminterior()!=""?" (Int. ".$generador->getNuminterior().")":"").", ".$generador->getColonia()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadordelegacion");
+		$elem->appendChild($xml->createCDATASection($generador->getMunicipio()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadorcp");
+		$elem->appendChild($xml->createCDATASection($generador->getCp()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadoredo");
+		$elem->appendChild($xml->createCDATASection($generador->getEstado()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadortel");
+		$elem->appendChild($xml->createCDATASection($generador->getRepresentantetelefono().($generador->getRepresentanteextension()!=""?"-".$generador->getRepresentanteextension():"")));
+		$nodoManifiesto->appendChild($elem);
+		$refs="";
+		$hr1="";
+		$hr2="";
+		if($generador->getReferencias()) $refs=$generador->getReferencias();
+		if($generador->getHorarioinicio()!="" || $generador->getHorariofin()!="") $hr1=$generador->getHorarioinicio()."-".$generador->getHorariofin();
+		if($generador->getHorarioinicio2()!="" || $generador->getHorariofin2()!="") $hr2=$generador->getHorarioinicio2()."-".$generador->getHorariofin2();
+		$refs.=($refs!=""?", ":"").$hr1;
+		$refs.=($refs!=""?", ":"").$hr2;
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadorreferencias");
+		$elem->appendChild($xml->createCDATASection($refs));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_instrucciones");
+		$elem->appendChild($xml->createCDATASection($manifiesto->getInstruccionesespeciales()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_cccontenedorcap");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI1"]) && $recoleccion["BI1"]!==false?$recoleccion["BI1"]["contenedorcapacidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_cccontenedortipo");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI1"]) && $recoleccion["BI1"]!==false?$recoleccion["BI1"]["contenedortipo"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_cccantidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI1"]) && $recoleccion["BI1"]!==false?$recoleccion["BI1"]["cantidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_ccunidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI1"]) && $recoleccion["BI1"]!==false?$recoleccion["BI1"]["unidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_punzcontenedorcap");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI2"]) && $recoleccion["BI2"]!==false?$recoleccion["BI2"]["contenedorcapacidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_punzcontenedortipo");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI2"]) && $recoleccion["BI2"]!==false?$recoleccion["BI2"]["contenedortipo"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_punzcantidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI2"]) && $recoleccion["BI2"]!==false?$recoleccion["BI2"]["cantidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_punzunidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI2"]) && $recoleccion["BI2"]!==false?$recoleccion["BI2"]["unidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_patcontenedorcap");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI3"]) && $recoleccion["BI3"]!==false?$recoleccion["BI3"]["contenedorcapacidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_patcontenedortipo");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI3"]) && $recoleccion["BI3"]!==false?$recoleccion["BI3"]["contenedortipo"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_patcantidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI3"]) && $recoleccion["BI3"]!==false?$recoleccion["BI3"]["cantidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_patunidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI3"]) && $recoleccion["BI3"]!==false?$recoleccion["BI3"]["unidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_noanatcontenedorcap");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI4"]) && $recoleccion["BI4"]!==false?$recoleccion["BI4"]["contenedorcapacidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_noanatcontenedortipo");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI4"]) && $recoleccion["BI4"]!==false?$recoleccion["BI4"]["contenedortipo"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_noanatcantidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI4"]) && $recoleccion["BI4"]!==false?$recoleccion["BI4"]["cantidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_noanatunidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI4"]) && $recoleccion["BI4"]!==false?$recoleccion["BI4"]["unidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_sangrecontenedorcap");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI5"]) && $recoleccion["BI5"]!==false?$recoleccion["BI5"]["contenedorcapacidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_sangrecontenedortipo");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI5"]) && $recoleccion["BI5"]!==false?$recoleccion["BI5"]["contenedortipo"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_sangecantidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI5"]) && $recoleccion["BI5"]!==false?$recoleccion["BI5"]["cantidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_sangreunidad");
+		$elem->appendChild($xml->createCDATASection(isset($recoleccion["BI5"]) && $recoleccion["BI5"]!==false?$recoleccion["BI5"]["unidad"]:""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_otrocontenedorcap");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_otrocontenedortipo");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_otrocantidad");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_otrounidad");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_totalcontenedorcap");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_totalcontenedortipo");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_totalcantidad");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_totalunidad");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_cetificacion");
+		$elem->appendChild($xml->createCDATASection($generador->getRepresentante()));
+		$nodoManifiesto->appendChild($elem);
+		$sucursal->setIdsucursal($ruta->getEmpresatransportista());
+		$sucursal->getFromDatabase();
+		$empresa->setIdempresa($sucursal->getIdempresa());
+		$empresa->getFromDatabase();
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transprazonsoc");
+		$elem->appendChild($xml->createCDATASection($empresa->getRazonsocial()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpdocimicilio");
+		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().", ".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").", ".$sucursal->getColonia().", ".$sucursal->getMunicipio().", ".$sucursal->getEstado()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transptel");
+		$elem->appendChild($xml->createCDATASection($sucursal->getTelefono()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpautsemarnat");
+		$elem->appendChild($xml->createCDATASection($sucursal->getAutsemarnat()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpregsct");
+		$elem->appendChild($xml->createCDATASection($sucursal->getRegistrosct()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpoperadornombre");
+		$elem->appendChild($xml->createCDATASection($operador->getNombre()." ".$operador->getApaterno()." ".$operador->getAmaterno()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpoperadorfirma");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpoperadorcargo");
+		$elem->appendChild($xml->createCDATASection($operador->getCargo()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpfecha");
+		$elem->appendChild($xml->createCDATASection(DateToMx($manifiesto->getFechaembarque())));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpruta");
+		$elem->appendChild($xml->createCDATASection($ruta->getIdentificador()." - ".$ruta->getNombre()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpvahiculotipo");
+		$elem->appendChild($xml->createCDATASection($vehiculo->getTipo()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_transpvahiculoplaca");
+		$elem->appendChild($xml->createCDATASection($vehiculo->getPlaca()));
+		$nodoManifiesto->appendChild($elem);
+		$sucursal->setIdsucursal($ruta->getEmpresadestinofinal());
+		$sucursal->getFromDatabase();
+		$empresa->setIdempresa($sucursal->getIdempresa());
+		$empresa->getFromDatabase();
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_razonsoc");
+		$elem->appendChild($xml->createCDATASection($empresa->getRazonsocial()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_nautsemarnat");
+		$elem->appendChild($xml->createCDATASection($sucursal->getAutsemarnat()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_domicilio");
+		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().", ".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").", ".$sucursal->getColonia().", ".$sucursal->getMunicipio().", ".$sucursal->getEstado()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_recibido");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_observaciones");
+		$elem->appendChild($xml->createCDATASection($manifiesto->getObservacionesdestinofinal()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_nombre");
+		$elem->appendChild($xml->createCDATASection($sucursal->getRepresentante()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_firma");
+		$elem->appendChild($xml->createCDATASection(""));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_cargo");
+		$elem->appendChild($xml->createCDATASection($sucursal->getCargorepresentante()));
+		$nodoManifiesto->appendChild($elem);
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_dest_fecha");
+		$elem->appendChild($xml->createCDATASection(DateToMx($manifiesto->getFecharecepcion())));
+		$nodoManifiesto->appendChild($elem);
+		return $nodoManifiesto;
+	}
+	private function creaXMLManifiesto($idmanifiesto)
+	{
+		$doc=new DOMDocument("1.0","utf-8");
+		$raiz=$doc->createElement("manifiestos");
+		$raiz->appendChild($this->creaNodoXML($doc,$idmanifiesto));
+		$doc->appendChild($raiz);
+		$doc->formatOutput=true;
+		$archivo="manifiesto_".time().".xml";
+		$doc->save($this->config->item("ruta_downloads").$archivo);
+		header("location: ".base_url("project_files/app/make_manifiesto_pdf_from_xml.php?arch=$archivo"));
 	}
 }
 ?>
