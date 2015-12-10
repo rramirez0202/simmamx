@@ -67,7 +67,8 @@ class Reporte extends CI_Controller
 				$doc->formatOutput=true;
 				$archivo="reporte_".time().".xml";
 				$doc->save($this->config->item("ruta_downloads").$archivo);
-				header("location: ".base_url("project_files/app/make_excel_from_xml.php?arch=$archivo&path=".base_url("reporte/descargarExcel")));
+				$url=base_url("project_files/app/make_excel_from_xml.php?arch=$archivo&path=".base_url("reporte/descargarExcel"));
+				header("location: ".$url);
 			}
 		}
 		echo " No hay registros para exportar";

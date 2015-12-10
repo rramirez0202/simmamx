@@ -195,7 +195,7 @@ class Bitacoras extends CI_Controller
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_generadordocimicilio");
-		$elem->appendChild($xml->createCDATASection($generador->getCalle().", ".$generador->getNumexterior().($generador->getNuminterior()!=""?" (Int. ".$generador->getNuminterior().")":"").", ".$generador->getColonia()));
+		$elem->appendChild($xml->createCDATASection($generador->getCalle().",".$generador->getNumexterior().($generador->getNuminterior()!=""?" (Int. ".$generador->getNuminterior().")":"").",".$generador->getColonia()));
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_generadordelegacion");
@@ -355,7 +355,7 @@ class Bitacoras extends CI_Controller
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_transpdocimicilio");
-		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().", ".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").", ".$sucursal->getColonia().", ".$sucursal->getMunicipio().", ".$sucursal->getEstado()));
+		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().",".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").",".$sucursal->getColonia().",".$sucursal->getMunicipio().",".$sucursal->getEstado()));
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_transptel");
@@ -411,7 +411,7 @@ class Bitacoras extends CI_Controller
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_dest_domicilio");
-		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().", ".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").", ".$sucursal->getColonia().", ".$sucursal->getMunicipio().", ".$sucursal->getEstado()));
+		$elem->appendChild($xml->createCDATASection($sucursal->getCalle().",".$sucursal->getNumexterior().($sucursal->getNuminterior()!=""?"-".$sucursal->getNuminterior():"").",".$sucursal->getColonia().",".$sucursal->getMunicipio().",".$sucursal->getEstado()));
 		$nodoManifiesto->appendChild($elem);
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_dest_recibido");

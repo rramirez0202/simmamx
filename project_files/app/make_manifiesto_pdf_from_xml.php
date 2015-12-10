@@ -22,7 +22,7 @@ if($archivo!="" && $coords!="")
 function AgregaManifiesto(MyPDFFile &$pdf,DOMElement $nodoManifiesto,$coords)
 {
 	$pdf->AddPage("P","Letter");
-	$pdf->SetFont("Courier","",9);
+	$pdf->SetFont("Times","",9);
 	$pdf->SetMargins(0,0,0);
 	$pdf->SetAutoPageBreak(false,0);
 	$generalX=$coords["general"]["posicion"]["x"];

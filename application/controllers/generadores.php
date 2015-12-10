@@ -255,9 +255,11 @@ class Generadores extends CI_Controller
 		$this->load->model("modgenerador");
 		$this->modgenerador->setIdgenerador($id);
 		$fechas=$this->input->post("fechas");
+		$delOtherDates=$this->input->post("delOtherDates");
 		if($fechas!==false && is_array($fechas) && count($fechas)>0)
 		{
-			$this->modgenerador->eliminaFechasCalendario();
+			if($delOtherDates=="1")
+				$this->modgenerador->eliminaFechasCalendario();
 			foreach($fechas as $fecha)
 				if($fecha!="")
 					$this->modgenerador->agregaFechaCalendario(0,$fecha);

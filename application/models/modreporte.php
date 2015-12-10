@@ -157,7 +157,8 @@ class Modreporte extends CI_Model
 			switch($op)
 			{
 				case 'LIKE':
-					$whr.=(trim($whr)!=""?" AND ":"")."{$p["campo"]} LIKE '%{$p["valor"]}%' ";
+					if($p["valor"]!="")
+						$whr.=(trim($whr)!=""?" AND ":"")."{$p["campo"]} LIKE '%{$p["valor"]}%' ";
 					break;
 				case '>':
 				case '>=':
@@ -171,7 +172,9 @@ class Modreporte extends CI_Model
 					break;
 			}
 		}
-		return "WHERE ".$whr;
+		if($whr!="")
+			return "WHERE ".$whr;
+		return "";
 	}
 	public function makeSQL()
 	{

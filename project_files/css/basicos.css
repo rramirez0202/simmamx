@@ -67,3 +67,7 @@ table.Reporte th
 {
 	display: none;
 }
+.numero
+{
+	text-align: right;
+}

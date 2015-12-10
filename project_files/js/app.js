@@ -1608,6 +1608,15 @@ function fnManifiesto()
 			Mensaje("Error al cargar el menu: "+mensaje+"<br />"+jqXHRObj.responseText);
 		});
 	}
+	this.SumaCantidad=function()
+	{
+		var suma=0.0;
+		$("#tblCantidades input").each(function(idx){
+			if(typeof this.id!="undefined" && this.id!="total")
+				suma+=parseFloat($(this).val());
+		});
+		$("#total")[0].value=suma.toFixed(3);
+	}
 }
 
 function fnCatalogos()
@@ -2279,7 +2288,7 @@ function fnCalendario()
 	}
 	this.GuardarFechas=function()
 	{
-		var fechas=$("#frm_fechas").serialize();
+		var fechas=$("#frm_fechas").serialize()+"&delOtherDates="+($("#delOtherDates")[0].checked?1:0);
 		Mensaje("Guardando Fechas");
 		var ajx=$.ajax({
 			method:	"POST",
@@ -2291,10 +2300,12 @@ function fnCalendario()
 			if(resp.trim()=="")
 				location.href=baseURL+'generadores/ver/'+$("#idgenerador").val();
 			else
+			{
 				$.msg('unblock',10,3);
 				setTimeout(function(){
 					Alert()(resp,function(){return true;});
 				},500);
+			}
 		});
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
@@ -2357,6 +2368,10 @@ function fnReporte()
 			{
 				$("#reporttable").DataTable();
 			}
+			if(typeof $(resp)[4]!=="undefined")
+				console.log($(resp)[4].nodeValue);
+			else
+				console.log($(resp)[2].nodeValue);
 		});
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
@@ -2384,7 +2399,7 @@ function fnReporte()
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
 			setTimeout(function(){
-				Mensaje("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText);
+				Alert("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return false;});
 			},500);
 		});
 	}

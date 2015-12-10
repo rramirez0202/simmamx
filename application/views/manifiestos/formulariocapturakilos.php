@@ -1,4 +1,6 @@
-<form id="frm_captura_kilos">
+<?php
+$total=0.0;
+?><form id="frm_captura_kilos">
 	<div class="row">
 		<label for="frm_noexterno" class="col-sm-4 control-label">No. Externo</label>
 		<div class="col-sm-8">
@@ -26,7 +28,7 @@
 						<!--<th>Unidad de Volumen</th>-->
 					</tr>
 				</tfoot>
-				<tbody>
+				<tbody id="tblCantidades">
 					<?php foreach($recoleccion as $rec): ?>
 						<tr>
 							<td><?= $rec["residuo"]["nombre"]; ?></td>
@@ -37,13 +39,21 @@
 								<input type="text" id="tipo_<?= $rec["residuo"]["idresiduo"]; ?>" name="tipo_<?= $rec["residuo"]["idresiduo"]; ?>" value="<?= ($rec["recoleccion"]!==false?$rec["recoleccion"]["contenedortipo"]:""); ?>" />
 							</td>-->
 							<td>
-								<input type="text" class="form-control" id="cantidad_<?= $rec["residuo"]["idresiduo"]; ?>" name="cantidad_<?= $rec["residuo"]["idresiduo"]; ?>" value="<?= ($rec["recoleccion"]!==false?$rec["recoleccion"]["cantidad"]:""); ?>" maxlength="8" />
+								<input type="text" class="form-control numero" id="cantidad_<?= $rec["residuo"]["idresiduo"]; ?>" name="cantidad_<?= $rec["residuo"]["idresiduo"]; ?>" value="<?= ($rec["recoleccion"]!==false?$rec["recoleccion"]["cantidad"]:""); ?>" maxlength="8" onchange="Manifiesto.SumaCantidad()" />
 							</td>
 							<!--<td>
 								<input type="text" id="unidad_<?= $rec["residuo"]["idresiduo"]; ?>" name="unidad_<?= $rec["idresiduo"]["idresiduo"]; ?>" value="<?= ($rec["recoleccion"]!==false?$rec["recoleccion"]["unidad"]:""); ?>" />
 							</td>-->
 						</tr>
-					<?php endforeach; ?>
+					<?php 
+					$total+=floatval(($rec["recoleccion"]!==false?$rec["recoleccion"]["cantidad"]:"0"));
+					endforeach; ?>
+					<tr>
+						<td><strong>Total</strong></td>
+						<td>
+							<input type="text" class="form-control numero" id="total" name="total" readonly="readonly" value="<?= number_format($total,3); ?>" />
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
