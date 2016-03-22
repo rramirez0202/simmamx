@@ -37,4 +37,14 @@ function Refill($dato,$largo,$relleno,$rellenaXIzquierda=true)
 	}
 	return $dato;
 }
+function Day($fecha) { return substr($fecha,8,2); }
+function Month($fecha) { return substr($fecha,5,2); }
+function Year($fecha) { return substr($fecha,0,4); }
+function MonthYear($fecha) { return substr($fecha,0,4)."-".substr($fecha,5,2); }
+function NextMonthYear($fecha)
+{
+	if(Month($fecha)=="12")
+		return (intval(Year($fecha))+1)."-01";
+	return Year($fecha)."-".((intval(Month($fecha))+1)<10?"0":"").(intval(Month($fecha))+1);
+}
 ?>

@@ -231,7 +231,16 @@
 		</form>
 		<div class="row">
 			<div class="col-sm-12">
-				<div class="alert alert-info"><span class="glyphicon glyphicon-info-sign"></span> Al guardar las fechas de servicio seleccionadas se eliminarán las fechas generadas anteriormente.</div>
+				<div class="alert alert-info ">
+					<div class="pull-right">
+						<label>
+							<span class="glyphicon glyphicon-info-sign"></span>
+							<input type="checkbox" checked="checked" id="delOtherDates" name="delOtherDates" value="1" />
+							Eliminar fechar almacenadas anteriormente.
+						</label>
+					</div>
+					&nbsp;
+				</div>
 			</div>
 		</div>
 		<div class="row">

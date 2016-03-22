@@ -201,6 +201,7 @@ class Modsucursal extends CI_Model
 	public function delete($id=0)
 	{
 		//Elimina la relacion con la empresa pero la deja viva
+		//Elimina la relacion con el grupo pero la deja viva
 		if($this->idsucursal==""||$this->idsucursal==0)
 		{
 			if($id>0)
@@ -239,7 +240,7 @@ class Modsucursal extends CI_Model
 			$this->modresiduo->delete();
 		}
 		$this->db->where('idsucursal',$this->idsucursal);
-		$this->db->delete(array('relempsuc','sucursal'));
+		$this->db->delete(array('relgruusu','relempsuc','sucursal'));
 	}
 	public function getResiduos()
 	{

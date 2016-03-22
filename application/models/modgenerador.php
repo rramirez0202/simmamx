@@ -59,6 +59,7 @@ class Modgenerador extends CI_Model
 	private $fechascalendario;
 	private $activo;
 	private $fechaactivo;
+	private $giro;
 	public function __construct()
 	{
 		parent::__construct();
@@ -120,6 +121,7 @@ class Modgenerador extends CI_Model
 		$this->fechascalendario=array();
 		$this->activo=0;
 		$this->fechaactivo="";
+		$this->giro="";
 	}
 	public function getIdgenerador() { return $this->idgenerador; }
 	public function getIdentificador() { return $this->identificador; }
@@ -199,6 +201,7 @@ class Modgenerador extends CI_Model
 	public function getFechascalendario() { return $this->fechascalendario; }
 	public function getActivo() { return $this->activo; }
 	public function getFechaactivo() { return $this->fechaactivo; }
+	public function getGiro() { return $this->giro; }
 	public function setIdgenerador($valor) { $this->idgenerador= intval($valor); }
 	public function setIdentificador($valor) { $this->identificador= "".$valor; }
 	public function setRazonsocial($valor) { $this->razonsocial= "".$valor; }
@@ -257,6 +260,7 @@ class Modgenerador extends CI_Model
 	public function setFechascalendario($valor) { if(is_array($valor)) $this->fechascalendario=$valor; else array_push($this->fechascalendario,$valor); }
 	public function setActivo($valor) { $this->activo= intval($valor); }
 	public function setFechaactivo($valor) { $this->fechaactivo= "".$valor; }
+	public function setGiro($valor) { $this->giro= "".$valor; }
 	public function getFromDatabase($id=0)
 	{
 		if($this->idgenerador==""||$this->idgenerador==0)
@@ -325,6 +329,7 @@ class Modgenerador extends CI_Model
 		$this->setHorariofin2($reg["horariofin2"]);
 		$this->setActivo($reg["activo"]);
 		$this->setFechaactivo($reg["fechaactivo"]);
+		$this->setGiro($reg["giro"]);
 		$this->db->where('idgenerador',$this->idgenerador);
 		$regs=$this->db->get('relcligen');
 		if($regs->num_rows()>0)
@@ -416,6 +421,7 @@ class Modgenerador extends CI_Model
 		$this->setFechascalendario($this->input->post("frm_generador_fechascalendario"));
 		$this->setActivo($this->input->post("frm_generador_activo"));
 		$this->setFechaactivo($this->input->post("frm_generador_fechaactivo"));
+		$this->setGiro($this->input->post("frm_generador_giro"));
 		return true;
 	}
 	public function addToDatabase()
@@ -473,7 +479,8 @@ class Modgenerador extends CI_Model
 			"horarioinicio2"=>$this->horarioinicio2,
 			"horariofin2"=>$this->horariofin2,
 			"activo"=>$this->activo,
-			"fechaactivo"=>$this->fechaactivo
+			"fechaactivo"=>$this->fechaactivo,
+			"giro"=>$this->giro
 		);
 		if($this->identificador==""||$this->razonsocial==""||$this->idcliente==0)
 			return false;
@@ -561,7 +568,8 @@ class Modgenerador extends CI_Model
 			"horarioinicio2"=>$this->horarioinicio2,
 			"horariofin2"=>$this->horariofin2,
 			"activo"=>$this->activo,
-			"fechaactivo"=>$this->fechaactivo
+			"fechaactivo"=>$this->fechaactivo,
+			"giro"=>$this->giro
 		);
 		$this->db->where('idgenerador',$this->idgenerador);
 		$this->db->update('generador',$data);
@@ -595,6 +603,66 @@ class Modgenerador extends CI_Model
 		if($regs->num_rows()==0)
 			return false;
 		return $regs->result_array();
+	}
+	public function getAllFiltered($filtros)
+	{
+		$whr="";
+		$takePrefs=false;
+		if(is_array($filtros))
+		{
+			if(isset($filtros["identificador"]) && trim($filtros["identificador"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."identificador like '%{$filtros["identificador"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["rfc"]) && trim($filtros["rfc"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."rfc like '%{$filtros["rfc"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["razonsocial"]) && trim($filtros["razonsocial"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."razonsocial like '%{$filtros["razonsocial"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["vendedor"]) && trim($filtros["vendedor"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."vendedor like '%{$filtros["vendedor"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["giro"]) && trim($filtros["giro"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."giro like '%{$filtros["giro"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["observaciones"]) && trim($filtros["observaciones"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."observaciones like '%{$filtros["observaciones"]}%'";
+				$takePrefs=true;
+			}
+			if(isset($filtros["colonia"]) && trim($filtros["colonia"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."(colonia like '%{$filtros["colonia"]}%' OR cobranzacolonia like '%{$filtros["colonia"]}%')";
+				$takePrefs=true;
+			}
+			if(isset($filtros["municipio"]) && trim($filtros["municipio"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."(municipio like '%{$filtros["municipio"]}%' OR cobranzamunicipio like '%{$filtros["municipio"]}%')";
+				$takePrefs=true;
+			}
+		}
+		if($whr!="" && ($takePrefs||true))
+		{
+			if(count($this->modsesion->getAllGens())>0)
+				$whr.=" AND idgenerador IN (".implode(",",$this->modsesion->getAllGens()).")";
+			$this->db->where($whr);
+			$this->db->order_by('razonsocial');
+			$regs=$this->db->get('generador');
+			if($regs->num_rows()==0)
+				return false;
+			return $regs->result_array();
+		}
+		return false;
 	}
 	public function delete($id=0)
 	{
@@ -676,6 +744,35 @@ class Modgenerador extends CI_Model
 		if($regs->num_rows()==0)
 			return false;
 		return $regs->result_array();
+	}
+	public function getRango($idCte,$genIni,$genFin)
+	{
+		$this->db->where("CONVERT(identificador,UNSIGNED) between $genIni and $genFin and idgenerador in (select idgenerador from relcligen where idcliente = '$idCte')");
+		//$this->db->order_by("CONVERT(identificador,UNSIGNED), razonsocial");
+		$regs=$this->db->get("generador");
+		if($regs->num_rows()>0)
+			return $regs->result_array();
+		return array();
+	}
+	public function getFechasRango($fecIni,$fecFin)
+	{
+		if($this->idgenerador==""||$this->idgenerador==0)
+		{
+			return array();
+		}
+		$this->db->where("idcalendario in (select idcalendario from relgencal where idgenerador={$this->idgenerador})");
+		$this->db->order_by("fecha");
+		$regs=$this->db->get('calendario');
+		if($regs->num_rows()>0) 
+			return $regs->result_array();
+		return array();
+	}
+	public function asJSON()
+	{
+		$data=array();
+		foreach($this as $k=>$v)
+			$data[$k]=$v;
+		return json_encode($data);
 	}
 }
 ?>

@@ -44,7 +44,7 @@
 <link href="<?= base_url('project_files/bootstrap/css/dataTables.bootstrap.min.css'); ?>" />
 <!-- App SIMA -->
 <script type="text/javascript" src="<?= base_url('project_files/js/app.js?fecha='.time()); ?>"></script>
-<link rel="stylesheet" type="text/css" href="<?= base_url('project_files/css/basicos.css'); ?>">       
+<link rel="stylesheet" type="text/css" href="<?= base_url('project_files/css/basicos.css?fecha='.time()); ?>">       
 <script type="text/javascript">
 	var baseURL='<?= base_url(); ?>';
 </script>

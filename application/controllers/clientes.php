@@ -13,21 +13,27 @@ class Clientes extends CI_Controller
 		$this->load->model('modsucursal');
 		$this->load->model('modempresa');
 		$this->load->model('modcatalogo');
+		$this->load->model('modgenerador');
 		$head=$this->load->view('html/head',array(),true);
 		$menumain=$this->load->view('menu/menumain',array(),true);
 		$empresas=$this->modempresa->getAllCoorporativo();
-		if($idempresa==0 && count($empresas)>0) $idempresa=$empresas[0]["idempresa"];
+		//if($idempresa==0 && count($empresas)>0) $idempresa=$empresas[0]["idempresa"];
 		$sucursales=($idempresa>0?$this->modsucursal->getAll($idempresa):array());
-		if($idsucursal==0 && count($sucursales)>0) $idsucursal=$sucursales[0]["idsucursal"];
+		//if($idsucursal==0 && count($sucursales)>0) $idsucursal=$sucursales[0]["idsucursal"];
 		$filtros=array(
 			"identificador"=>$this->input->post('frm_prefer_identificador'),
 			"rfc"=>$this->input->post('frm_prefer_rfc'),
 			"razonsocial"=>$this->input->post('frm_prefer_razonsocial'),
 			"vendedor"=>$this->input->post('frm_prefer_vendedor'),
 			"giro"=>$this->input->post('frm_prefer_giro'),
-			"observaciones"=>$this->input->post('frm_prefer_observaciones')
+			"observaciones"=>$this->input->post('frm_prefer_observaciones'),
+			"colonia"=>$this->input->post('frm_prefer_colonia'),
+			"municipio"=>$this->input->post('frm_prefer_municipio')
 		);
-		$clientes=($idsucursal>0?$this->modcliente->getAll($idsucursal,$filtros):array());
+		$clientes=$this->modcliente->getAll($idsucursal,$filtros);
+		$clientes=$clientes!==false?$clientes:array();
+		$generadores=$this->modgenerador->getAllFiltered($filtros);
+		$generadores=$generadores!==false?$generadores:array();
 		$body=$this->load->view('clientes/index',array(
 			"menumain"=>$menumain,
 			"sucursales"=>$sucursales,
@@ -35,6 +41,7 @@ class Clientes extends CI_Controller
 			"idempresa"=>$idempresa,
 			"idsucursal"=>$idsucursal,
 			"clientes"=>$clientes,
+			"generadores"=>$generadores,
 			"filtros"=>$filtros,
 			"vendedor"=>$this->modcatalogo->getCatalogo(4)
 			),true);
@@ -452,6 +459,9 @@ class Clientes extends CI_Controller
 									case 'BA':
 									    $objeto->setCobranzacp($celda->nodeValue);
 									    break;
+									case 'BB':
+										$objeto->setReferenciabancaria($celda->nodeValue);
+										break;
 								}
 							}
 							$fac->addToDatabase();
@@ -668,6 +678,9 @@ class Clientes extends CI_Controller
 									case 'BC':
 									    $objeto->setCobranzacp($celda->nodeValue);
 									    break;
+									case 'BD':
+										$objeto->setGiro($celda->nodeValue);
+										break;
 								}
 							}
 							$fac->addToDatabase();
@@ -705,6 +718,141 @@ class Clientes extends CI_Controller
 	public function menucrearreporte()
 	{
 		$this->load->view('clientes/menureportes');
+	}
+	public function calendarios()
+	{
+		$this->load->model('modcliente');
+		$this->load->model('modgenerador');
+		$this->load->library('calendar',array(
+			'start_dat'=>'monday',
+			'moth_type'=>'long',
+			'day_type'=>'short',
+			'template'=>file_get_contents("./project_files/files/templates/calendario.php")
+		));
+		$tipo=$this->input->post('tipo_gen');
+		$cte_inicial=$this->input->post('frm_cte_inicial');
+		$cte_final=$this->input->post('frm_cte_final');
+		$gen_inicial=$this->input->post('frm_gen_inicial');
+		$gen_final=$this->input->post('frm_gen_final');
+		$fec_inicial=$this->input->post('frm_fec_inicial');
+		$fec_final=$this->input->post('frm_fec_final');
+		$data=array();
+		if($tipo=="rg")
+		{
+			if(($cte_inicial!==false && $cte_inicial!=="")) $cte_final=$cte_inicial;
+			else if(($cte_final!==false||$cte_final!=="")) $cte_inicial=$cte_final;
+			if($gen_inicial===false||$gen_inicial=="") $gen_inicial="1";
+			if($gen_final===false||$gen_final=="") $gen_final=$gen_inicial;
+			$ctes=$this->modcliente->getRango($cte_inicial,$cte_final);
+			foreach($ctes as $c)
+			{
+				$datagens=array();
+				$gens=$this->modgenerador->getRango($c["idcliente"],$gen_inicial,$gen_final);
+				foreach($gens as $g)
+				{
+					$dbGen=new Modgenerador();
+					$dbGen->getFromDatabase($g["idgenerador"]);
+					$g["fechas"]=$dbGen->getFechasRango($fec_inicial,$fec_final);
+					if($g["fechas"]!==false && count($g["fechas"])>0)
+						array_push($datagens,$g);
+				}
+				$c["generadores"]=$datagens;
+				if($c["generadores"]!==false && count($c["generadores"])>0)
+					array_push($data,$c);
+			}
+		}
+		else if($tipo=="rc")
+		{
+			if(($cte_inicial!==false && $cte_inicial!=="") && ($cte_final===false||$cte_final=="")) $cte_final=$cte_inicial;
+			else if(($cte_final!==false||$cte_final!=="") && ($cte_inicial===false||$cte_inicial=="")) $cte_inicial=$cte_final;
+			$ctes=$this->modcliente->getRango($cte_inicial,$cte_final);
+			foreach($ctes as $c)
+			{
+				$dbcte=new Modcliente();
+				$dbcte->getFromDatabase($c["idcliente"]);
+				$datagens=array();
+				$gens=$this->modgenerador->getAll($c["idcliente"]);
+				if($gens!==false) foreach($gens as $g)
+				{
+					$dbGen=new Modgenerador();
+					$dbGen->getFromDatabase($g["idgenerador"]);
+					$g["fechas"]=$dbGen->getFechasRango($fec_inicial,$fec_final);
+					if($g["fechas"]!==false && count($g["fechas"])>0)
+						array_push($datagens,$g);
+				}
+				$c["generadores"]=$datagens;
+				if($c["generadores"]!==false && count($c["generadores"])>0)
+					array_push($data,$c);
+			}
+		}
+		foreach($data as $i=>$c)
+		{
+			$contgen=0;
+			foreach($c["generadores"] as $j=>$g)
+			{
+				if(count($this->modsesion->getAllGens())>0 && !in_array($g["idgenerador"],$this->modsesion->getAllGens()))
+				{
+					unset($data[$i]["generadores"][$j]);
+				}
+				else
+				{
+					$data[$i]["generadores"][$j]["vista"]=$this->load->view("clientes/calendario_display",array(
+						"fec_inicial"=>$fec_inicial,
+						"fec_final"=>$fec_final,
+						"fecs"=>$g["fechas"]
+						),true);
+					$contgen++;
+				}
+			}
+			if($contgen==0)
+				unset($data[$i]);
+		}
+		$head=$this->load->view('html/head',array(),true);
+		$menumain=$this->load->view('menu/menumain',array("justCloseWindow"=>true),true);
+		$body=$this->load->view('clientes/calendario',array(
+			"menumain"=>$menumain,
+			"cte_inicial"=>$cte_inicial,
+			"cte_final"=>$cte_final,
+			"gen_inicial"=>$gen_inicial,
+			"gen_final"=>$gen_final,
+			"tipo"=>$tipo,
+			"fec_inicial"=>$fec_inicial,
+			"fec_final"=>$fec_final,
+			"data"=>$data
+			),true);
+		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
+	}
+	public function getjson($data="")
+	{
+		$this->load->model('modcliente');
+		if($data=="")
+		{
+			echo json_encode($this->modcliente->getAll(0,array("identificador"=>"%")));
+		}
+		else
+		{
+			list($campo,$valor)=explode("=",$data);
+			$campo=strtolower(trim($campo));
+			if($campo=="sucursal")
+				echo json_encode($this->modcliente->getAll($valor,""));
+			else if(strpos($campo,"_equal"))
+			{
+				if($campo=="identificador_equal")
+				{
+					$id=$this->modcliente->getIdclienteWithIdentificador(0,$valor);
+					if($id!==false)
+					{
+						$this->modcliente->setIdcliente($id);
+						$this->modcliente->getFromDatabase();
+						echo $this->modcliente->asJSON();
+					}
+				}
+			}
+			else
+			{
+				echo json_encode($this->modcliente->getAll(0,array($campo=>$valor)));
+			}
+		}
 	}
 }
 ?>

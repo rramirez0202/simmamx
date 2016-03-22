@@ -227,10 +227,17 @@ Date.prototype.getSemanaEnMes=function()
 	{
 		diaPrimero.agregaDias(1);
 	}*/
-	var numSemana=this.getSemana(false)-diaPrimero.getSemana(false)+(diaPrimero.getDay()==0?0:1);
+	//var numSemana=this.getSemana(false)-diaPrimero.getSemana(false)+(diaPrimero.getDay()==0?0:1);
+	var numSemana=this.getSemana(false)-diaPrimero.getSemana(false)+1;
 	if(numSemana>0)
 		return numSemana;
 	return this.getSemana(false)+(diaPrimero.getDay()==0?0:1);
+}
+Date.prototype.getUltimoDiaEnMesPrevio=function()
+{
+	var fecha=new Date(this.getFullYear(),this.getMonth(),1);
+	fecha.agregaDias(-1);
+	return fecha;
 }
 Array.prototype.igual=function(data)
 {
@@ -239,6 +246,51 @@ Array.prototype.igual=function(data)
 		if(!isNaN(x) && typeof data[x]!="undefined" && this[x]==data[x])
 			cont++;
 	return (this.length==data.length && cont==this.length);
+}
+String.prototype.toNormalString=function()
+{
+	var cadena=this;
+	var res="";
+	for(var x=0;x<cadena.length;x++)
+	{
+		var car=cadena.substring(x,x+1);
+		if(('a'<=car && car<='z')||('A'<=car && car<='Z')||('0'<=car && car<='9'))
+			res+=car;
+		else if(car=="á") res+="a";
+		else if(car=="Á") res+="A";
+		else if(car=="é") res+="e";
+		else if(car=="É") res+="E";
+		else if(car=="í") res+="i";
+		else if(car=="Í") res+="I";
+		else if(car=="ó") res+="o";
+		else if(car=="Ó") res+="O";
+		else if(car=="ú") res+="u";
+		else if(car=="Ú") res+="U";
+		else if(car=="ü") res+="u";
+		else if(car=="Ü") res+="U";
+		else res+=" ";
+	}
+	while(res.indexOf("  ")>=0)
+		res=res.replace("  "," ");
+	return res;
+}
+function aleatorioEntre(min,max)
+{
+	var aleat=Math.random()*(max-min);
+	return parseInt(min)+Math.round(aleat);
+}
+function EstandarizaString(cadena)
+{
+	var largo=30;
+	if(!cadena)
+	{
+		return typeof cadena;
+	}
+	if(cadena.length<=largo)
+		return cadena;
+	if(largo<=cadena.length && cadena.length<=(largo*2))
+		return cadena.substring(0,largo)+"...";
+	return cadena.substring(0,largo/2)+"..."+cadena.substring(cadena.length-(largo/2));
 }
 
 function fnEmpresa()
@@ -1301,6 +1353,8 @@ function fnResiduo()
 	}
 }
 
+var filas=new Array();
+var manifiestosImportar=new Array();
 function fnManifiesto()
 {
 	this.Buscar=function()
@@ -1405,7 +1459,8 @@ function fnManifiesto()
 			cache:	false,
 			data:{
 				bitacora:	$("#frm_nuevo_bitacora").val(),
-				fecha:		$("#frm_nuevo_fecha").val()
+				fecha:		$("#frm_nuevo_fecha").val(),
+				ruta:		$("#frm_nuevo_ruta").val()
 			}
 		});
 		ajx.done(function(resp){
@@ -1607,6 +1662,203 @@ function fnManifiesto()
 		ajx.fail(function(jqXHRObj,mensaje){
 			Mensaje("Error al cargar el menu: "+mensaje+"<br />"+jqXHRObj.responseText);
 		});
+	}
+	this.SumaCantidad=function()
+	{
+		var suma=0.0;
+		$("#tblCantidades input").each(function(idx){
+			if(typeof this.id!="undefined" && this.id!="total")
+				suma+=parseFloat($(this).val());
+		});
+		$("#total")[0].value=suma.toFixed(3);
+	}
+	this.importarValidaCliente=function(noFila)
+	{
+		var identificador=$("#no_cte_"+noFila).val();
+		$("#nom_cte_"+noFila).html('');
+		$("#id_cte_"+noFila)[0].value="";
+		$("#no_gen_"+noFila)[0].value="";
+		$("#nom_gen_"+noFila).html('');
+		$("#id_gen_"+noFila)[0].value="";
+		if(identificador==="")
+		{
+			Alert("Debe ingresar el No. de Cliente.",function(){$("#no_cte_"+noFila).focus();});
+			return false;
+		}
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"clientes/getjson/identificador_equal="+identificador,
+			cache:	false
+		});
+		ajx.done(function(resp){
+			if(resp=="")
+			{
+				Alert("No se encontro el cliente "+identificador+".",function(){$("#no_cte_"+noFila).focus();});
+				return false;
+			}
+			var cte=JSON.parse(resp);
+			if(typeof cte==="object" && cte.idcliente && cte.idcliente>0)
+			{
+				$("#nom_cte_"+noFila).html(cte.razonsocial);
+				$("#id_cte_"+noFila)[0].value=cte.idcliente;
+				$("#no_gen_"+noFila).focus();
+			}
+			else
+			{
+				Alert("Error al obtener el cliente "+identificador+".",function(){$("#no_cte_"+noFila).focus();});
+				return false;
+			}
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			Alert("Error al obtener datos: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+		});
+	}
+	this.importarValidaGenerador=function(noFila)
+	{
+		if($("#id_cte_"+noFila).val()=="")
+		{
+			$("#no_gen_"+noFila)[0].value="";
+			return false;
+		}
+		var identificador=$("#no_gen_"+noFila).val();
+		$("#nom_gen_"+noFila).html('');
+		$("#id_gen_"+noFila)[0].value="";
+		if(identificador==="")
+		{
+			Alert("Debe ingresar el No. de Generador.",function(){$("#no_gen_"+noFila).focus();});
+			return false;
+		}
+		var ajx=$.ajax({
+			method: "POST",
+			url:	baseURL+"generadores/getjson/identificador_equal="+$("#id_cte_"+noFila).val()+","+identificador
+		});
+		ajx.done(function(resp){
+			if(resp=="")
+			{
+				Alert("No se encontro el generador "+identificador+".",function(){$("#no_gen_"+noFila).focus();});
+				return false;
+			}
+			var gen=JSON.parse(resp);
+			if(typeof gen==="object" && gen.idgenerador>0)
+			{
+				if(gens.length==0)
+				{
+					$("#nom_gen_"+noFila).html(gen.razonsocial);
+					$("#id_gen_"+noFila)[0].value=gen.idgenerador;
+				}
+				else if(gens.indexOf(gen.idgenerador+"")>-1)
+				{
+					$("#nom_gen_"+noFila).html(gen.razonsocial);
+					$("#id_gen_"+noFila)[0].value=gen.idgenerador;
+				}
+				else
+				{
+					Alert("El generador "+identificador+" no pertenece al grupo de generadores asignado.",function(){$("#no_cte_"+noFila).focus();});
+					return false;
+				}
+			}
+			else
+			{
+				Alert("Error al obtener el generador "+identificador+".",function(){$("#no_gen_"+noFila).focus();});
+				return false;
+			}
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			Alert("Error al obtener datos: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+		});
+	}
+	this.importarSumaKilos=function(noFila)
+	{
+		var suma=0.0;
+		suma+=parseFloat("0"+$("#sangre_"+noFila).val());
+		suma+=parseFloat("0"+$("#cultivos_"+noFila).val());
+		suma+=parseFloat("0"+$("#pato_"+noFila).val());
+		suma+=parseFloat("0"+$("#noanat_"+noFila).val());
+		suma+=parseFloat("0"+$("#punzo_"+noFila).val());
+		suma+=parseFloat("0"+$("#medcad_"+noFila).val());
+		$("#total_"+noFila)[0].value=suma;
+	}
+	this.importarValidaFilas=function()
+	{
+		filas=new Array();
+		$("#frm_importado input[type=checkbox]").each(function(idx){
+			if(this.checked)
+			{
+				filas.push(this.value);
+			}
+		});
+		for(var idx in filas) if(!isNaN(idx))
+		{
+			if($("#id_gen_"+filas[idx]).val()==="")
+			{
+				Alert("Debe ingresar el cliente y generador válidos.",function(){$("#no_cte_"+filas[idx]).focus();});
+				return false;
+			}
+		}
+		return true;
+	}
+	this.importarCaptura=function()
+	{
+		if(this.importarValidaFilas())
+		{
+			manifiestosImportar=new Array();
+			for(var idx in filas) if(!isNaN(idx))
+			{
+				var tmpManif={
+					manifiesto	: $("#identif_manif_"+filas[idx]).val(),
+					fecha		: $("#fecha_"+filas[idx]).val(),
+					ruta		: $("#ruta_"+filas[idx]).val(),
+					generador	: $("#id_gen_"+filas[idx]).val(),
+					motivo		: $("#frm_motivo_"+filas[idx]).val(),
+					r_san		: $("#sangre_"+filas[idx]).val(),
+					r_cc		: $("#cultivos_"+filas[idx]).val(),
+					r_pat		: $("#pato_"+filas[idx]).val(),
+					r_noanat	: $("#noanat_"+filas[idx]).val(),
+					r_punzo		: $("#punzo_"+filas[idx]).val(),
+					r_medcad	: $("#medcad_"+filas[idx]).val(),
+					status		: $("#status_"+filas[idx]).val()
+				};
+				manifiestosImportar.push(tmpManif);
+			}
+			Mensaje("Capturando Manifiestos");
+			this.importarEnviarCaptura();
+		}
+	}
+	this.importarEnviarCaptura=function()
+	{
+		if(manifiestosImportar.length>0)
+		{
+			var m=manifiestosImportar.pop();
+			console.log(m);
+			var ajx=$.ajax({
+					method: "POST",
+					url:	baseURL+"manifiestos/capturarImportacion",
+					data:	m
+				});
+			ajx.done(function(resp){
+				if(resp!=="")
+				{
+					Alert(resp,function(){return false;});
+				}
+				else
+				{
+					Manifiesto.importarEnviarCaptura();
+				}
+			});
+			ajx.fail(function(jqXHRObj,mensaje){
+				$.msg('unblock',10,3);
+				setTimeout(function(){
+					Alert("Error al ejecutar captura de manifiestos: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+				},500);
+			});
+		}
+		else
+		{
+			$.msg('unblock',10,3);
+				setTimeout(function(){
+					Alert("Importado Terminado",function(){location.href=baseURL+'manifiestos';});
+				},500);
+		}
 	}
 }
 
@@ -1963,7 +2215,7 @@ function fnUsuario()
 	}
 	this.Eliminar=function(id)
 	{
-		Confirm("¿Realmente desa eliminar este Vehículo?",function(){
+		Confirm("¿Realmente desa eliminar este Usuario?",function(){
 			$.msg('unblock',10,2);
 			setTimeout(function(){
 				Mensaje("Eliminando");
@@ -2195,7 +2447,7 @@ function fnCalendario()
 	this.GeneraCalendario1VezPorMes=function(dias,semanas,cadaXMeses)
 	{
 		// Cambia la lógica de la semana, en lugar de ser la primer semana es el primer día X (L,M,W,J,V,S,D) del mes, y repite cada cadaXMeses
-		var fechaActual=this.fechaInicial;
+		var fechaActual=this.fechaInicial.getUltimoDiaEnMesPrevio();
 		var contDiaSemana=fechaActual.getSemanaEnMes();
 		var mesActual=fechaActual.getMonth();
 		while(fechaActual.getTime()<(this.fechaFinal.getTime()+(1*24*60*60*1000)))
@@ -2208,7 +2460,8 @@ function fnCalendario()
 					mesActual=fechaActual.getMonth();
 					contDiaSemana=0;
 				}
-				if(contDiaSemana!=this.fechaInicial.getSemanaEnMes())
+				//if(contDiaSemana!=this.fechaInicial.getSemanaEnMes())
+				if(contDiaSemana!=fechaActual.getSemanaEnMes())
 					contDiaSemana++;
 				if(semanas[contDiaSemana-1])
 				{
@@ -2242,14 +2495,28 @@ function fnCalendario()
 			var semanas=this.GetSemanas(2);
 			if(!semanas.igual([false,false,false,false]))
 			{
-				var fechaActual=this.fechaInicial;
+				//var fechaActual=this.fechaInicial;
+				var fechaActual=this.fechaInicial.getUltimoDiaEnMesPrevio();
+				var mesActual=fechaActual.getMonth();
+				var contDiaSemana=fechaActual.getSemanaEnMes();
 				while(fechaActual.getTime()<(this.fechaFinal.getTime()+(1*24*60*60*1000)))
 				{
 					if(dias[fechaActual.getDay()])
 					{
-						var semanaActual=fechaActual.getSemanaEnMes();
+						/*var semanaActual=fechaActual.getSemanaEnMes();
 						if(semanaActual>0 && semanas[semanaActual-1])
+							this.fechas.push(new Date(fechaActual.getTime()));*/
+						if(mesActual!=fechaActual.getMonth())
+						{
+							mesActual=fechaActual.getMonth();
+							contDiaSemana=0;
+						}
+						if(contDiaSemana!=fechaActual.getSemanaEnMes())
+							contDiaSemana++;
+						if(semanas[contDiaSemana-1])
+						{
 							this.fechas.push(new Date(fechaActual.getTime()));
+						}
 					}
 					fechaActual.agregaDias(1);
 				}
@@ -2279,7 +2546,7 @@ function fnCalendario()
 	}
 	this.GuardarFechas=function()
 	{
-		var fechas=$("#frm_fechas").serialize();
+		var fechas=$("#frm_fechas").serialize()+"&delOtherDates="+($("#delOtherDates")[0].checked?1:0);
 		Mensaje("Guardando Fechas");
 		var ajx=$.ajax({
 			method:	"POST",
@@ -2291,10 +2558,12 @@ function fnCalendario()
 			if(resp.trim()=="")
 				location.href=baseURL+'generadores/ver/'+$("#idgenerador").val();
 			else
+			{
 				$.msg('unblock',10,3);
 				setTimeout(function(){
 					Alert()(resp,function(){return true;});
 				},500);
+			}
 		});
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
@@ -2357,6 +2626,10 @@ function fnReporte()
 			{
 				$("#reporttable").DataTable();
 			}
+			if(typeof $(resp)[4]!=="undefined")
+				console.log($(resp)[4].nodeValue);
+			else
+				console.log($(resp)[2].nodeValue);
 		});
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
@@ -2384,9 +2657,347 @@ function fnReporte()
 		ajx.fail(function(jqXHRObj,mensaje){
 			$.msg('unblock',10,3);
 			setTimeout(function(){
-				Mensaje("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText);
+				Alert("Error al generar reporte: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return false;});
 			},500);
 		});
+	}
+}
+
+function fnGrupo()
+{
+	this.ValidaFrmIn=function()
+	{
+		if(Validacion.Vacio('frm_grupo_nombre','Debe ingresar un nombre para el grupo.'))
+			return false;
+		return true
+	}
+	this.Enviar=function(nuevo,reload)
+	{
+		if(this.ValidaFrmIn())
+		{
+			var urlFrm=baseURL+"grupos/"+(nuevo===true?'add':'update');
+			Mensaje("Guardando");
+			var ajx=$.ajax({
+				method:	"POST",
+				url:	urlFrm,
+				cache:	false,
+				data:	$("#frm_grupos").serialize()
+			});
+			ajx.done(function(resp){
+				if(resp!="" && !isNaN(parseInt(resp)))
+				{
+					if(reload)
+					{
+						location.href=baseURL+"grupos/actualizar/"+resp;
+					}
+					else
+					{
+						location.href=baseURL+"grupos/ver/"+resp;
+					}
+				}
+				else
+					Mensaje(resp);
+			});
+			ajx.fail(function(jqXHRObj,mensaje){
+				$.msg('unblock',10,3);
+				setTimeout(function(){
+					Mensaje("Error al guardar los datos: "+mensaje+"<br />"+jqXHRObj.responseText);
+				},500)
+			});
+		}
+	}
+	this.Eliminar=function(id)
+	{
+		Confirm("¿Realmente desa eliminar este Grupo?",function(){
+			$.msg('unblock',10,2);
+			setTimeout(function(){
+				Mensaje("Eliminando");
+				var ajx=$.ajax({
+					method:	"POST",
+					url:	baseURL+'grupos/eliminar/'+id,
+					cache:	false
+				});
+				ajx.done(function(resp){
+					if(resp=="")
+						location.href=baseURL+'grupos';
+					else
+						Mensaje(resp);
+				});
+				ajx.fail(function(jqXHRObj,mensaje){
+					$.msg('unblock',10,3);
+					setTimeout(function(){
+						Mensaje("Error al eliminar los datos: "+mensaje+"<br />"+jqXHRObj.responseText);
+					},500);
+				});
+			},500);
+		});
+	}
+	this.FrmUpdSucursales=function()
+	{
+		Mensaje("Cargando lista de sucursales");
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"grupos/frmasignasucursales/"+$("#frm_grupo_idgrupo").val(),
+			cache:	false
+		});
+		ajx.done(function(resp){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				var elems=$("#frm_grupo_sucursales").val().trim().split(",");
+				$("#frm_grupo_sucursales")[0].value="";
+				Alert(resp,function(){
+					$("#messageSuc").show();
+				});
+				for(var x=0;x<elems.length;x++)
+					Grupo.setSucursal(elems[x]);
+			},500);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				Alert("Error al obtener lista de sucursales: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+			},500);
+		});
+	}
+	this.FrmUpdClientes=function()
+	{
+		Mensaje("Cargando lista de clientes<br />Este proceso puede llevar varios minutos.");
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"grupos/frmasignaclientes/"+$("#frm_grupo_idgrupo").val(),
+			cache:	false
+		});
+		ajx.done(function(resp){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				var elems=$("#frm_grupo_clientes").val().trim().split(",");
+				$("#frm_grupo_clientes")[0].value="";
+				Alert(resp,function(){
+					$("#messageCte").show();
+				});
+				for(var x=0;x<elems.length;x++)
+					Grupo.setCte(elems[x]);
+				
+			},500);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				Alert("Error al obtener lista de clientes: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+			},500);
+		});
+	}
+	this.FrmUpdGeneradores=function()
+	{
+		Mensaje("Cargando lista de Generadores<br />Este proceso puede llevar varios minutos.");
+		var ajx=$.ajax({
+			method:	"POST",
+			url:	baseURL+"grupos/frmasignageneradores/"+$("#frm_grupo_idgrupo").val(),
+			cache:	false
+		});
+		ajx.done(function(resp){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				var elems=$("#frm_grupo_generadores").val().trim().split(",");
+				$("#frm_grupo_generadores")[0].value="";
+				Alert(resp,function(){
+					$("#messageGen").show();
+				});
+				for(var x=0;x<elems.length;x++)
+					Grupo.setGen(elems[x]);
+			},500);
+		});
+		ajx.fail(function(jqXHRObj,mensaje){
+			$.msg('unblock',10,3);
+			setTimeout(function(){
+				Alert("Error al obtener lista de generadores: "+mensaje+"<br />"+jqXHRObj.responseText,function(){return true;});
+			},500);
+		});
+	}
+	this.findSucursales=function()
+	{
+		var text=$("#frm_txt2Find").val().trim().toNormalString().toLowerCase();
+		$(".dataListSupercontainer li").each(function(idx){
+			var element=$(this);
+			var cont=element.html().trim().toNormalString().toLowerCase();
+			if(cont!="")
+			{
+				if(cont.indexOf(text)>-1)
+					element.show();
+				else
+					element.hide();
+			}
+			else
+				element.show();
+		});
+	}
+	this.findCtes=function()
+	{
+		var text=$("#frm_txt2Find").val().trim().toNormalString().toLowerCase();
+		var cteIni=$("#frm_cteInicio").val().trim().toNormalString().toLowerCase();
+		var cteFin=$("#frm_cteFin").val().trim().toNormalString().toLowerCase();
+		cteIni=(!isNaN(parseInt(cteIni))&&parseInt(cteIni)>0)?parseInt(cteIni):0;
+		cteFin=(!isNaN(parseInt(cteFin))&&parseInt(cteFin)>0)?parseInt(cteFin):0;
+		if(cteIni>cteFin && cteFin>1)
+		{
+			var tmp=cteIni;
+			cteIni=cteFin;
+			cteFin=tmp;
+		}
+		if(cteFin==0&&cteIni>0) 
+			cteFin=cteIni;
+		$("#frm_cteInicio")[0].value=cteIni;
+		$("#frm_cteFin")[0].value=cteFin;
+		$(".dataListSupercontainer li").each(function(idx){
+			var element=$(this);
+			var txt=element.html().trim().split(" - ");
+			var numcte=parseInt(txt[0].trim());
+			var cont=txt[1].trim().toNormalString().toLowerCase();
+			if(cont!="")
+			{
+				if(cont.indexOf(text)>-1)
+				{
+					if(cteIni!=0)
+					{
+						if((cteIni<=numcte && numcte<=cteFin))
+							element.show();
+						else
+							element.hide();
+					}
+					else
+						element.show();
+				}
+				else
+					element.hide();
+			}
+			else
+			{
+				if(cteIni!=0 && cteIni<=numcte && numcte<=cteFin)
+					element.show();
+				else
+					element.hide();
+			}
+		});
+	}
+	this.findGens=function()
+	{
+		var text=$("#frm_txt2Find").val().trim().toNormalString().toLowerCase();
+		var cteIni=$("#frm_cteInicio").val().trim().toNormalString().toLowerCase();
+		var cteFin=$("#frm_cteFin").val().trim().toNormalString().toLowerCase();
+		cteIni=(!isNaN(parseInt(cteIni))&&parseInt(cteIni)>0)?parseInt(cteIni):0;
+		cteFin=(!isNaN(parseInt(cteFin))&&parseInt(cteFin)>0)?parseInt(cteFin):0;
+		if(cteIni>cteFin && cteFin>1)
+		{
+			var tmp=cteIni;
+			cteIni=cteFin;
+			cteFin=tmp;
+		}
+		if(cteFin==0&&cteIni>0) 
+			cteFin=cteIni;
+		$("#frm_cteInicio")[0].value=cteIni;
+		$("#frm_cteFin")[0].value=cteFin;
+		$(".dataListSupercontainer li").each(function(idx){
+			var element=$(this);
+			var txt=element.html().trim().split(" - ");
+			var numcte=parseInt(txt[0].trim());
+			var cont=txt[2].trim().toNormalString().toLowerCase();
+			if(cont!="")
+			{
+				if(cont.indexOf(text)>-1)
+				{
+					if(cteIni!=0)
+					{
+						if((cteIni<=numcte && numcte<=cteFin))
+							element.show();
+						else
+							element.hide();
+					}
+					else
+						element.show();
+				}
+				else
+					element.hide();
+			}
+			else
+			{
+				if(cteIni!=0 && cteIni<=numcte && numcte<=cteFin)
+					element.show();
+				else
+					element.hide();
+			}
+		});
+	}
+	this.setSucursal=function(id)
+	{
+		if(id=="")
+			return false;
+		var elems=$("#frm_grupo_sucursales").val().trim().split(",");
+		if(elems.length==1 && elems[0]=="")
+			elems=new Array();
+		var tmp=Array();
+		if(elems.indexOf(id)>-1)
+		{
+			for(var x=0;x<elems.length;x++)
+				if(elems[x]!=id)	
+					tmp.push(elems[x]);
+			$("#element_"+id).removeClass('active');
+		}
+		else
+		{
+			tmp=elems;
+			tmp.push(id);
+			$("#element_"+id).addClass('active');
+		}
+		$("#frm_grupo_sucursales")[0].value=tmp.join(',');
+		return true;
+	}
+	this.setCte=function(id)
+	{
+		if(id=="")
+			return false;
+		var elems=$("#frm_grupo_clientes").val().trim().split(",");
+		if(elems.length==1 && elems[0]=="")
+			elems=new Array();
+		var tmp=Array();
+		if(elems.indexOf(id)>-1)
+		{
+			for(var x=0;x<elems.length;x++)
+				if(elems[x]!=id)	
+					tmp.push(elems[x]);
+			$("#element_"+id).removeClass('active');
+		}
+		else
+		{
+			tmp=elems;
+			tmp.push(id);
+			$("#element_"+id).addClass('active');
+		}
+		$("#frm_grupo_clientes")[0].value=tmp.join(',');
+		return true;
+	}
+	this.setGen=function(id)
+	{
+		if(id=="")
+			return false;
+		var elems=$("#frm_grupo_generadores").val().trim().split(",");
+		if(elems.length==1 && elems[0]=="")
+			elems=new Array();
+		var tmp=Array();
+		if(elems.indexOf(id)>-1)
+		{
+			for(var x=0;x<elems.length;x++)
+				if(elems[x]!=id)	
+					tmp.push(elems[x]);
+			$("#element_"+id).removeClass('active');
+		}
+		else
+		{
+			tmp=elems;
+			tmp.push(id);
+			$("#element_"+id).addClass('active');
+		}
+		$("#frm_grupo_generadores")[0].value=tmp.join(',');
+		return true;
 	}
 }
 
@@ -2407,6 +3018,7 @@ var Usuario		= new fnUsuario();
 var Calendario	= new fnCalendario();
 var Bitacora	= new fnBitacora();
 var Reporte		= new fnReporte();
+var Grupo		= new fnGrupo();
 
 $.extend(true, $.fn.dataTable.defaults, {
 	"scrollY": 400,

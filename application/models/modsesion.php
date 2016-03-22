@@ -2,10 +2,16 @@
 class Modsesion extends CI_Model
 {
 	private $perfiles;
+	private $grupos;
+	private $allctes;
+	private $allgens;
 	public function __construct()
 	{
 		parent::__construct();
-		$perfiles=array();
+		$this->perfiles=array();
+		$this->grupos=array();
+		$this->allctes=array();
+		$this->allgens=array();
 	}
 	public function getAcceso($usr,$pwd)
 	{
@@ -30,8 +36,51 @@ class Modsesion extends CI_Model
 		if($insession)
 		{
 			$this->getPerfiles();
+			$this->getGrupos();
 		}
 		return $insession;
+	}
+	private function getGrupos()
+	{
+		$this->load->model('modusuario');
+		$this->load->model('modgrupo');
+		$musuario=new Modusuario();
+		$musuario->getFromDatabase($this->session->userdata('idusuario'));
+		$this->grupos=array();
+		$this->allctes=array();
+		$this->allgens=array();
+		foreach($musuario->getGrupos() as $gpo)
+		{
+			$grupo=new Modgrupo();
+			$grupo->getFromDatabase($gpo);
+			array_push($this->grupos,array(
+				"idgrupo"=>$grupo->getIdgrupo(),
+				"nombre"=>$grupo->getNombre(),
+				"ctes"=>$grupo->getClientes(),
+				"sucs"=>$grupo->getSucursales(),
+				"allctes"=>$grupo->getClientescompleto(),
+				"allgens"=>$grupo->getGeneradorescompleto()
+			));
+			foreach($grupo->getClientescompleto() as $cte)
+				if(!in_array($cte,$this->allctes))
+					array_push($this->allctes,$cte);
+			foreach($grupo->getGeneradorescompleto() as $gen)
+				if(!in_array($gen,$this->allgens))
+					array_push($this->allgens,$gen);
+		}
+		sort($this->allctes);
+	}
+	public function hasGroup($idgrupo=0)
+	{
+		if($idgrupo==0)
+			return (count($this->grupos)>0);
+		if(!is_array($idgrupo))
+			$idgrupo=array($idgrupo);
+		foreach($idgrupo as $gpo)
+			foreach($this->grupos as $g)
+				if($g["idgrupo"]==$idgrupo)
+					return true;
+		return false;
 	}
 	private function getPerfiles()
 	{
@@ -92,6 +141,21 @@ class Modsesion extends CI_Model
 			$this->session->userdata('datausr')!==false?$this->session->userdata('datausr')["usuario"]:"",
 			$this->session->userdata('datausr')!==false?$this->session->userdata('datausr')["nombre"]." ".$this->session->userdata('datausr')["apaterno"]:""
 			);
+	}
+	public function getGrupo($idgrupo)
+	{
+		foreach($this->grupos as $g)
+			if($g["idgrupo"]==$idgrupo)
+				return $g;
+		return false;
+	}
+	public function getAllCtes()
+	{
+		return $this->allctes;
+	}
+	public function getAllGens()
+	{
+		return $this->allgens;
 	}
 }
 ?>

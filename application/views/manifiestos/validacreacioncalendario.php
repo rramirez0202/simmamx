@@ -7,6 +7,7 @@ $generador=new Modgenerador();
 	<input type="hidden" id="frm_validacion_idsucursal" name="frm_validacion_idsucursal" value="<?= $idsucursal; ?>" />
 	<input type="hidden" id="frm_validacion_bitacora" name="frm_validacion_bitacora" value="<?= $bitacora; ?>" />
 	<input type="hidden" id="frm_validacion_fecha" name="frm_validacion_fecha" value="<?= $fecha; ?>" />
+	<input type="hidden" id="frm_validacion_idruta" name="frm_validacion_idruta" value="<?= $ruta->getIdruta() ?>" />
 	<div class="form-group">
 		<label for="frm_validacion_bit" class="col-sm-2 control-label">Bitacora:</label>
 		<div class="col-sm-4">
@@ -15,6 +16,12 @@ $generador=new Modgenerador();
 		<label for="frm_validacion_fec" class="col-sm-2 control-label">Fecha</label>
 		<div class="col-sm-4">
 			<p class="form-control-static"><?= DateToMx($fecha); ?></p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="frm_validacion_ruta" class="col-sm-2 control-label">Ruta</label>
+		<div class="col-sm-10">
+			<p class="form-control-static"><?= $ruta->getIdentificador()." - ".$ruta->getNombre(); ?></p>
 		</div>
 	</div>
 	<div class="table-responsive">
@@ -55,7 +62,7 @@ $generador=new Modgenerador();
 						</tr>
 						<?php
 						$sucAux=new Modsucursal();
-						$sucAux->getFromDatabase($idsucursal);
+						$sucAux->getFromDatabase($ruta->getIdsucursal());
 						$identificador=str_replace($sucAux->getIniciales(),"",$identificador)+1;
 						$identificador=$sucAux->getIniciales().$identificador;
 					}

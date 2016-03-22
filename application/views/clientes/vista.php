@@ -255,6 +255,10 @@
 					?>
 				</p>
 			</div>
+			<label for="frm_cliente_referenciabancaria" class="col-sm-2 control-label">Referencia Bancaria</label>
+			<div class="col-sm-4">
+				<p class="form-control-static"><?= $objeto->getReferenciabancaria(); ?><p class="form-control-static">
+			</div>
 		</div>
 		<div class="form-group">
 			<label for="frm_cliente_cobranzacontacto" class="col-sm-2 control-label">Contacto</label>
