@@ -52,6 +52,7 @@ class Modcliente extends CI_Model
 	private $facturaciones;
 	private $status;
 	private $fechastatus;
+	private $referenciabancaria;
 	public function __construct()
 	{
 		parent::__construct();
@@ -106,6 +107,7 @@ class Modcliente extends CI_Model
 		$this->facturaciones=array();
 		$this->status="";
 		$this->fechastatus="";
+		$this->referenciabancaria="";
 	}
 	public function getIdcliente() { return $this->idcliente; }
 	public function getIdentificador() { return $this->identificador; }
@@ -158,6 +160,7 @@ class Modcliente extends CI_Model
 	public function getFacturaciones() { return $this->facturaciones; }
 	public function getStatus() { return $this->status; }
 	public function getFechastatus() { return $this->fechastatus; }
+	public function getReferenciabancaria() { return $this->referenciabancaria; }
 	public function setIdcliente($valor) { $this->idcliente= intval($valor); }
 	public function setIdentificador($valor) { $this->identificador= "".$valor; }
 	public function setRazonsocial($valor) { $this->razonsocial= "".$valor; }
@@ -209,6 +212,7 @@ class Modcliente extends CI_Model
 	public function setFacturaciones($valor) { if(is_array($valor)) $this->facturaciones=$valor; else array_push($this->facturaciones,$valor); }
 	public function setStatus($valor) { $this->status= "".$valor; }
 	public function setFechastatus($valor) { $this->fechastatus= "".$valor; }
+	public function setReferenciabancaria($valor) { $this->referenciabancaria= "".$valor; }
 	public function getFromDatabase($id=0)
 	{
 		if($this->idcliente==""||$this->idcliente==0)
@@ -272,6 +276,7 @@ class Modcliente extends CI_Model
 		$this->setCobranzaextension2($reg["cobranzaextension2"]);
 		$this->setStatus($reg["status"]);
 		$this->setFechastatus($reg["fechastatus"]);
+		$this->setReferenciabancaria($reg["referenciabancaria"]);
 		$this->db->where('idcliente',$this->idcliente);
 		$regs=$this->db->get('relsuccli');
 		if($regs->num_rows()>0)
@@ -341,6 +346,7 @@ class Modcliente extends CI_Model
 		$this->setFacturaciones($this->input->post("frm_cliente_facturaciones"));
 		$this->setStatus($this->input->post("frm_cliente_status"));
 		$this->setFechastatus($this->input->post("frm_cliente_fechastatus"));
+		$this->setReferenciabancaria($this->input->post("frm_cliente_referenciabancaria"));
 		return true;
 	}
 	public function addToDatabase()
@@ -393,7 +399,8 @@ class Modcliente extends CI_Model
 			"cobranzatelefono2"=>$this->cobranzatelefono2,
 			"cobranzaextension2"=>$this->cobranzaextension2,
 			"status"=>$this->status,
-			"fechastatus"=>$this->fechastatus
+			"fechastatus"=>$this->fechastatus,
+			"referenciabancaria"=>$this->referenciabancaria
 		);
 		if($this->identificador==""||$this->razonsocial==""||$this->idsucursal==0)
 			return false;
@@ -463,7 +470,8 @@ class Modcliente extends CI_Model
 			"cobranzatelefono2"=>$this->cobranzatelefono2,
 			"cobranzaextension2"=>$this->cobranzaextension2,
 			"status"=>$this->status,
-			"fechastatus"=>$this->fechastatus
+			"fechastatus"=>$this->fechastatus,
+			"referenciabancaria"=>$this->referenciabancaria
 		);
 		$this->db->where('idcliente',$this->idcliente);
 		$this->db->update('cliente',$data);
@@ -481,11 +489,11 @@ class Modcliente extends CI_Model
 	public function getAll($idsucursal,$filtros)
 	{
 		$whr="";
+		$takePrefs=false;
 		if($idsucursal>0)
 			$whr.="idcliente in (select idcliente from relsuccli where idsucursal=$idsucursal)";
 		if(is_array($filtros))
 		{
-			$takePrefs=false;
 			if(isset($filtros["identificador"]) && trim($filtros["identificador"])!="")
 			{
 				$whr.=($whr!=""?" and ":"")."identificador like '%{$filtros["identificador"]}%'";
@@ -516,15 +524,27 @@ class Modcliente extends CI_Model
 				$whr.=($whr!=""?" and ":"")."observaciones like '%{$filtros["observaciones"]}%'";
 				$takePrefs=true;
 			}
-			if($whr!="" && ($takePrefs||true))
+			if(isset($filtros["colonia"]) && trim($filtros["colonia"])!="")
 			{
-				$this->db->where($whr);
-				$this->db->order_by('razonsocial');
-				$regs=$this->db->get('cliente');
-				if($regs->num_rows()==0)
-					return false;
-				return $regs->result_array();
+				$whr.=($whr!=""?" and ":"")."(colonia like '%{$filtros["colonia"]}%' OR cobranzacolonia like '%{$filtros["colonia"]}%')";
+				$takePrefs=true;
 			}
+			if(isset($filtros["municipio"]) && trim($filtros["municipio"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."(municipio like '%{$filtros["municipio"]}%' OR cobranzamunicipio like '%{$filtros["municipio"]}%')";
+				$takePrefs=true;
+			}
+		}
+		if($whr!="" && ($takePrefs||true))
+		{
+			if(count($this->modsesion->getAllCtes())>0)
+				$whr.=" AND idcliente IN (".implode(",",$this->modsesion->getAllCtes()).")";
+			$this->db->where($whr);
+			$this->db->order_by('razonsocial');
+			$regs=$this->db->get('cliente');
+			if($regs->num_rows()==0)
+				return false;
+			return $regs->result_array();
 		}
 		return false;
 	}
@@ -585,6 +605,22 @@ class Modcliente extends CI_Model
 		if($regs->num_rows()==0)
 			return false;
 		return $regs->row_array()["idcliente"];
+	}
+	public function getRango($cteIni,$cteFin)
+	{
+		$this->db->where("CONVERT(identificador,UNSIGNED) between $cteIni and $cteFin");
+		//$this->db->order_by("CONVERT(identificador,UNSIGNED), razonsocial");
+		$regs=$this->db->get("cliente");
+		if($regs->num_rows()>0)
+			return $regs->result_array();
+		return array();
+	}
+	public function asJSON()
+	{
+		$data=array();
+		foreach($this as $k=>$v)
+			$data[$k]=$v;
+		return json_encode($data);
 	}
 }
 ?>

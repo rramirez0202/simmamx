@@ -56,7 +56,7 @@
         		</label>
         	</div>
         </div>
-        <div class="col-sm-12">
+        <div class="col-sm-6">
         	<fieldset>
         		<legend>Perfiles</legend>
         		<?php if($perfiles!==false) foreach($perfiles as $perfil): ?>
@@ -64,6 +64,19 @@
         				<label>
         					<input type="checkbox" value="<?= $perfil["idperfil"]; ?>" id="frm_usuario_perfiles[]" name="frm_usuario_perfiles[]" <?= (in_array($perfil["idperfil"],$objeto->getPerfiles())?' checked="checked"':''); ?> disabled="disabled" />
         					<?= $perfil["nombre"]; ?>
+        				</label>
+        			</div>
+        		<?php endforeach; ?>
+        	</fieldset>
+        </div>
+        <div class="col-sm-6">
+        	<fieldset>
+        		<legend>Grupos</legend>
+        		<?php if($grupos!==false) foreach($grupos as $grupo): ?>
+        			<div class="checkbox">
+        				<label>
+        					<input type="checkbox" value="<?= $grupo["idgrupo"]; ?>" id="frm_usuario_grupos[]" name="frm_usuario_grupos[]" <?= (in_array($grupo["idgrupo"],$objeto->getGrupos())?' checked="checked"':''); ?> disabled="disabled" />
+        					<?= $grupo["nombre"]; ?>
         				</label>
         			</div>
         		<?php endforeach; ?>

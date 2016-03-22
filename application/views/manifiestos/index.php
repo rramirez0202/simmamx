@@ -12,6 +12,16 @@
 				<span class="glyphicon glyphicon-pencil"></span>
 			</button>
 			<?php endif; 
+			if($this->modsesion->hasPermisoHijo(115)): ?>
+			<button type="button" class="btn btn-default" title="Importar Manifiestos desde Excel" onclick="location.href='<?= base_url("manifiestos/importar/excel/$idempresa/$idsucursal")?>'">
+				<span class="glyphicon glyphicon-circle-arrow-up"></span> Importar Excel
+			</button>
+			<?php endif; 
+			if($this->modsesion->hasPermisoHijo(114)): ?>
+			<button type="button" class="btn btn-default" title="Importar Manifiestos desde formiik" onclick="location.href='<?= base_url("manifiestos/importar/formiik/$idempresa/$idsucursal")?>'">
+				<span class="glyphicon glyphicon-circle-arrow-up"></span> Importar Formiik
+			</button>
+			<?php endif; 
 			if($this->modsesion->hasPermisoHijo(101)): ?>
 			<button type="button" class="btn btn-default" title="Generar Reportes" onclick="Manifiesto.FrmReporte()">
 				<span class="glyphicon glyphicon-book"></span>

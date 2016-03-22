@@ -61,6 +61,12 @@
 				</div>
 			</div>
 		</div>
+		<div class="form-group">
+			<label for="frm_generador_giro" class="col-sm-2 control-label">Giro</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" id="frm_generador_giro" name="frm_generador_giro" value="<?= $objeto->getGiro(); ?>" placeholder="" maxlength="255" />
+			</div>
+		</div>
 		<h5>Servicios</h5>
 		<div class="form-group">
 			<div class="col-sm-2">

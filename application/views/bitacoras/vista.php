@@ -23,7 +23,7 @@ $manifiesto=new ModManifiesto();
 			</button>
 			<?php endif;
 			if($this->modsesion->hasPermisoHijo(97)):?>
-			<button type="button" class="btn btn-default" title="Imprimir Bitácora" onclick="window.print()">
+			<button type="button" class="btn btn-default" title="Imprimir Bitácora" onclick="window.open('<?= base_url("bitacoras/imprimirbit/".$objeto->getIdbitacora()); ?>','bitacora2')">
 				<span class="glyphicon glyphicon-print"></span>
 			</button>
 			<?php endif;
@@ -42,9 +42,15 @@ $manifiesto=new ModManifiesto();
 	<h3>Bitacoras</h3>
 	<form class="form-horizontal" role="form" id="frm_rutas">
 		<div class="form-group">
-			<label for="frm_ruta_nombre" class="col-xs-2 control-label">Nombre de la Bitacora</label>
-			<div class="col-xs-4">
+			<label for="frm_ruta_nombre" class="col-xs-2 control-label">Bitacora</label>
+			<div class="col-xs-10">
 				<p class="form-control-static"><?= $objeto->getNombre(); ?></p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="frm_ruta_nombre" class="col-xs-2 control-label">Folio</label>
+			<div class="col-xs-4">
+				<p class="form-control-static"><?= $objeto->getIdentificador(); ?></p>
 			</div>
 			<label for="frm_ruta_identificador" class="col-xs-2 control-label">Fecha de la Bitacora</label>
 			<div class="col-xs-4">
@@ -139,3 +145,6 @@ $manifiesto=new ModManifiesto();
 			</tbody>
 		</table>
 </div>
+<script type="text/javascript">
+	$(document).ready(function(){$("div.table-responsive table").DataTable();});
+</script>

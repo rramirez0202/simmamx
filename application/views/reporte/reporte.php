@@ -1,10 +1,6 @@
 <?= $menumain; ?>
-<?php
-
-?>
 <div class="container">
 	<h3>Reporte <small><?= $reporte->getTitulo(); ?></small></h3>
-	
 	<form class="form-horizontal" role="form" id="frm_reporte">
 		<input type="hidden" name="read" id="read" value="1" />
 		<input type="hidden" name="idreporte" id="idreporte" value="<?= $reporte->getIdreporte(); ?>">

@@ -10,6 +10,13 @@ class Modruta extends CI_Model
 	private $identificador;
 	private $idoperador;
 	private $idvehiculo;
+	private $serviciolunes;
+	private $serviciomartes;
+	private $serviciomiercoles;
+	private $serviciojueves;
+	private $servicioviernes;
+	private $serviciosabado;
+	private $serviciodomingo;
 	public function __construct()
 	{
 		parent::__construct();
@@ -22,6 +29,13 @@ class Modruta extends CI_Model
 		$this->identificador="";
 		$this->idoperador=0;
 		$this->idvehiculo=0;
+		$this->serviciolunes=0;
+		$this->serviciomartes=0;
+		$this->serviciomiercoles=0;
+		$this->serviciojueves=0;
+		$this->servicioviernes=0;
+		$this->serviciosabado=0;
+		$this->serviciodomingo=0;
 	}
 	public function getIdruta() { return $this->idruta; }
 	public function getNombre() { return $this->nombre; }
@@ -32,6 +46,13 @@ class Modruta extends CI_Model
 	public function getIdsucursal() { return $this->idsucursal; }
 	public function getIdoperador() { return $this->idoperador; }
 	public function getIdvehiculo() { return $this->idvehiculo; }
+	public function getServiciolunes() { return $this->serviciolunes; }
+	public function getServiciomartes() { return $this->serviciomartes; }
+	public function getServiciomiercoles() { return $this->serviciomiercoles; }
+	public function getServiciojueves() { return $this->serviciojueves; }
+	public function getServicioviernes() { return $this->servicioviernes; }
+	public function getServiciosabado() { return $this->serviciosabado; }
+	public function getServiciodomingo() { return $this->serviciodomingo; }
 	public function setIdruta($valor) { $this->idruta= intval($valor); }
 	public function setNombre($valor) { $this->nombre= "".$valor; }
 	public function setDescripcion($valor) { $this->descripcion= "".$valor; }
@@ -41,6 +62,13 @@ class Modruta extends CI_Model
 	public function setIdsucursal($valor) { $this->idsucursal= intval($valor); }
 	public function setIdoperador($valor) { $this->idoperador= intval($valor); }
 	public function setIdvehiculo($valor) { $this->idvehiculo= intval($valor); }
+	public function setServiciolunes($valor) { $this->serviciolunes= intval($valor); }
+	public function setServiciomartes($valor) { $this->serviciomartes= intval($valor); }
+	public function setServiciomiercoles($valor) { $this->serviciomiercoles= intval($valor); }
+	public function setServiciojueves($valor) { $this->serviciojueves= intval($valor); }
+	public function setServicioviernes($valor) { $this->servicioviernes= intval($valor); }
+	public function setServiciosabado($valor) { $this->serviciosabado= intval($valor); }
+	public function setServiciodomingo($valor) { $this->serviciodomingo= intval($valor); }
 	public function getFromDatabase($id=0)
 	{
 		if($this->idruta==""||$this->idruta==0)
@@ -61,6 +89,13 @@ class Modruta extends CI_Model
 		$this->setEmpresadestinofinal($reg["empresadestinofinal"]);
 		$this->setEmpresatransportista($reg["empresatransportista"]);
 		$this->setIdentificador($reg["identificador"]);
+		$this->setServiciolunes($reg["serviciolunes"]);
+		$this->setServiciomartes($reg["serviciomartes"]);
+		$this->setServiciomiercoles($reg["serviciomiercoles"]);
+		$this->setServiciojueves($reg["serviciojueves"]);
+		$this->setServicioviernes($reg["servicioviernes"]);
+		$this->setServiciosabado($reg["serviciosabado"]);
+		$this->setServiciodomingo($reg["serviciodomingo"]);
 		$this->db->where('idruta',$this->idruta);
 		$regs=$this->db->get('relsucrut');
 		if($regs->num_rows()==0)
@@ -93,6 +128,13 @@ class Modruta extends CI_Model
 		$this->setIdentificador($this->input->post("frm_ruta_identificador"));
 		$this->setIdoperador($this->input->post("frm_ruta_idoperador"));
 		$this->setIdvehiculo($this->input->post("frm_ruta_idvehiculo"));
+		$this->setServiciolunes($this->input->post("frm_ruta_serviciolunes"));
+		$this->setServiciomartes($this->input->post("frm_ruta_serviciomartes"));
+		$this->setServiciomiercoles($this->input->post("frm_ruta_serviciomiercoles"));
+		$this->setServiciojueves($this->input->post("frm_ruta_serviciojueves"));
+		$this->setServicioviernes($this->input->post("frm_ruta_servicioviernes"));
+		$this->setServiciosabado($this->input->post("frm_ruta_serviciosabado"));
+		$this->setServiciodomingo($this->input->post("frm_ruta_serviciodomingo"));
 		return true;
 	}
 	public function addToDatabase()
@@ -102,7 +144,14 @@ class Modruta extends CI_Model
 			"descripcion"=>$this->descripcion,
 			"empresadestinofinal"=>$this->empresadestinofinal,
 			"empresatransportista"=>$this->empresatransportista,
-			"identificador"=>$this->identificador
+			"identificador"=>$this->identificador,
+			"serviciolunes"=>$this->serviciolunes,
+			"serviciomartes"=>$this->serviciomartes,
+			"serviciomiercoles"=>$this->serviciomiercoles,
+			"serviciojueves"=>$this->serviciojueves,
+			"servicioviernes"=>$this->servicioviernes,
+			"serviciosabado"=>$this->serviciosabado,
+			"serviciodomingo"=>$this->serviciodomingo
 		);
 		$this->db->insert('ruta',$data);
 		$this->setIdruta($this->db->insert_id());
@@ -133,7 +182,14 @@ class Modruta extends CI_Model
 			"descripcion"=>$this->descripcion,
 			"empresadestinofinal"=>$this->empresadestinofinal,
 			"empresatransportista"=>$this->empresatransportista,
-			"identificador"=>$this->identificador
+			"identificador"=>$this->identificador,
+			"serviciolunes"=>$this->serviciolunes,
+			"serviciomartes"=>$this->serviciomartes,
+			"serviciomiercoles"=>$this->serviciomiercoles,
+			"serviciojueves"=>$this->serviciojueves,
+			"servicioviernes"=>$this->servicioviernes,
+			"serviciosabado"=>$this->serviciosabado,
+			"serviciodomingo"=>$this->serviciodomingo
 		);
 		$this->db->where('idruta',$this->idruta);
 		$this->db->update('ruta',$data);
@@ -176,6 +232,15 @@ class Modruta extends CI_Model
 		$this->db->select('idgenerador');
 		$this->db->where('idruta',$idruta);
 		$regs=$this->db->get('relrutgen');
+		if($regs->num_rows()==0)
+			return false;
+		return $regs->result_array();
+	}
+	public function getFromNombreIdentificador($dato)
+	{
+		$this->db->where("nombre = '$dato' or identificador = '$dato' ");
+		$this->db->order_by('nombre');
+		$regs=$this->db->get('ruta');
 		if($regs->num_rows()==0)
 			return false;
 		return $regs->result_array();

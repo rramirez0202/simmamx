@@ -3,7 +3,7 @@ if(!isset($justCloseWindow)) $justCloseWindow=false
 ?>
 <div class="barra_navegacion">
 	<div class="container">
-		<img src="<?= base_url('project_files/img/sistema/logo_simma.png'); ?>" class="logo_simma" />
+		<img src="<?= base_url('project_files/img/sistema/logo_simma.png'); ?>" class="logo_simma" onclick="location.href='<?= base_url('inicio/principal'); ?>'" />
 		<div class="btn-group pull-right menu_principal">
 			<?php if(!$justCloseWindow)
 			{
@@ -67,6 +67,9 @@ if(!isset($justCloseWindow)) $justCloseWindow=false
 						<?php endif;
 						if($this->modsesion->hasPermisoHijo(29)):?>
 						<li><a href="<?= base_url('catalogos'); ?>">Catalogos</a></li>
+						<?php endif;
+						if($this->modsesion->hasPermisoHijo(109)):?>
+						<li><a href="<?= base_url('grupos'); ?>">Grupos de Clientes</a></li>
 						<?php endif;
 						if($this->modsesion->hasPermisoHijo(26)):?>
 						<li><a href="<?= base_url('usuarios'); ?>">Usuarios</a></li>
