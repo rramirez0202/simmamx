@@ -3,6 +3,11 @@ class MyPDFFile extends FPDF
 {
 	private $widths;
 	private $aligns;
+    function Texto($x,$y,$texto)
+{
+    $this->_out('BT 1.00 Tc ET');
+    $this->Text($x,$y,$texto);
+}
     function SetWidths($w)
 	{
 	    //Set the array of column widths

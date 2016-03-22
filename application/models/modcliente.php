@@ -489,11 +489,11 @@ class Modcliente extends CI_Model
 	public function getAll($idsucursal,$filtros)
 	{
 		$whr="";
+		$takePrefs=false;
 		if($idsucursal>0)
 			$whr.="idcliente in (select idcliente from relsuccli where idsucursal=$idsucursal)";
 		if(is_array($filtros))
 		{
-			$takePrefs=false;
 			if(isset($filtros["identificador"]) && trim($filtros["identificador"])!="")
 			{
 				$whr.=($whr!=""?" and ":"")."identificador like '%{$filtros["identificador"]}%'";
@@ -524,15 +524,27 @@ class Modcliente extends CI_Model
 				$whr.=($whr!=""?" and ":"")."observaciones like '%{$filtros["observaciones"]}%'";
 				$takePrefs=true;
 			}
-			if($whr!="" && ($takePrefs||true))
+			if(isset($filtros["colonia"]) && trim($filtros["colonia"])!="")
 			{
-				$this->db->where($whr);
-				$this->db->order_by('razonsocial');
-				$regs=$this->db->get('cliente');
-				if($regs->num_rows()==0)
-					return false;
-				return $regs->result_array();
+				$whr.=($whr!=""?" and ":"")."(colonia like '%{$filtros["colonia"]}%' OR cobranzacolonia like '%{$filtros["colonia"]}%')";
+				$takePrefs=true;
 			}
+			if(isset($filtros["municipio"]) && trim($filtros["municipio"])!="")
+			{
+				$whr.=($whr!=""?" and ":"")."(municipio like '%{$filtros["municipio"]}%' OR cobranzamunicipio like '%{$filtros["municipio"]}%')";
+				$takePrefs=true;
+			}
+		}
+		if($whr!="" && ($takePrefs||true))
+		{
+			if(count($this->modsesion->getAllCtes())>0)
+				$whr.=" AND idcliente IN (".implode(",",$this->modsesion->getAllCtes()).")";
+			$this->db->where($whr);
+			$this->db->order_by('razonsocial');
+			$regs=$this->db->get('cliente');
+			if($regs->num_rows()==0)
+				return false;
+			return $regs->result_array();
 		}
 		return false;
 	}
@@ -593,6 +605,22 @@ class Modcliente extends CI_Model
 		if($regs->num_rows()==0)
 			return false;
 		return $regs->row_array()["idcliente"];
+	}
+	public function getRango($cteIni,$cteFin)
+	{
+		$this->db->where("CONVERT(identificador,UNSIGNED) between $cteIni and $cteFin");
+		//$this->db->order_by("CONVERT(identificador,UNSIGNED), razonsocial");
+		$regs=$this->db->get("cliente");
+		if($regs->num_rows()>0)
+			return $regs->result_array();
+		return array();
+	}
+	public function asJSON()
+	{
+		$data=array();
+		foreach($this as $k=>$v)
+			$data[$k]=$v;
+		return json_encode($data);
 	}
 }
 ?>

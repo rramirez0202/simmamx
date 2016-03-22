@@ -217,7 +217,11 @@ class ModManifiesto extends CI_Model
 	{
 		$whr="";
 		if($idsucursal>0)
-			$whr.="idmanifiesto in (select idmanifiesto from relgenman where idgenerador in (select idgenerador from relcligen where idcliente in (select idcliente from relsuccli where idsucursal = $idsucursal)))";
+			$whr.="idmanifiesto in (select idmanifiesto from relmanrut where idruta in (select idruta from relsucrut where idsucursal = $idsucursal))";
+		if(count($this->modsesion->getAllGens())>0)
+		{
+			$whr.=($whr!=""?" and ":"")."idmanifiesto in (select idmanifiesto from relgenman where idgenerador in (".implode(",",$this->modsesion->getAllGens())."))";
+		}
 		if(is_array($filtros))
 		{
 			$takePrefs=false;

@@ -53,6 +53,10 @@ body .container
 	{
 		font-size: 10px;
 	}
+	.noImprimir
+	{
+		display: none;
+	}
 }
 
 table.Reporte
@@ -70,4 +74,99 @@ table.Reporte th
 .numero
 {
 	text-align: right;
+}
+.arriba
+{
+	vertical-align: top;
+}
+.abajo
+{
+	vertical-align: bottom !important;
+}
+.ancho45pc
+{
+	width: 45%;
+}
+.calendarioEnd
+{
+	clear: both;
+}
+.mesCalendario
+{
+	float: left;
+	margin: 5px;
+	height: 275px;
+}
+.mesCalendario table
+{
+	border: 1px solid gray;
+	border-collapse: collapse;
+}
+.mesCalendario table th
+{
+	text-align: center;
+	border: 1px solid gray;
+}
+.mesCalendario table td
+{
+	width: 65px;
+	border: 1px solid gray;
+	text-align: center;
+	height: 36px;
+	vertical-align: top;
+}
+
+.mesCalendario table td div.contCalendario
+{
+	font-size: 75%;
+	text-align: center;
+	background-color: gray;
+	color: white;
+}
+
+div.saltoPagina
+{
+	display: none;
+}
+
+@media print
+{
+	.mesCalendario
+	{
+		page-break-inside: avoid;
+		height: 250px;
+	}
+	.mesCalendario table td
+	{
+		width: 45px;
+		height: 30px;
+		overflow: hidden;
+	}
+	.mesCalendario p
+	{
+		display: none;
+	}
+	div.saltoPagina
+	{
+		display: block;
+		page-break-before: always;
+	}
+}
+
+div.dataListSupercontainer
+{
+	min-width: 400px;
+	max-width: 750px;
+	height: 350px;
+	overflow: scroll;
+	padding: 5px;
+}
+div.dataListSupercontainerParent
+{
+	min-width: 400px;
+	max-width: 750px;
+}
+div.dataListSupercontainerSearcher
+{
+	margin-bottom: 10px;
 }

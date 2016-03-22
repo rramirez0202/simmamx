@@ -54,7 +54,8 @@ class Coordenadas
 					"manifiesto_space_totalcontenedortipo"	=> new Punto(118,	128,	false),
 					"manifiesto_space_totalcantidad"		=> new Punto(143,	128,	false),
 					"manifiesto_space_totalunidad"			=> new Punto(170,	128,	false),
-					"manifiesto_space_cetificacion"			=> new Punto(43,	160,	false)
+					"manifiesto_space_cetificacion"			=> new Punto(43,	160,	false),
+					"manifiesto_space_generadorfrecuencia"	=> new Punto(170,	35)
 					)
 				),
 			"transporte"							=> array(

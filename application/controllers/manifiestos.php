@@ -327,12 +327,43 @@ class Manifiestos extends CI_Controller
 	}
 	public function crearcalendario($idempresa,$idsucursal)
 	{
+		$this->load->model('modempresa');
+		$this->load->model('modsucursal');
+		$this->load->model('modruta');
+		$rutaScheme=array();
+		$emps=$this->modempresa->getAll();
+		if($emps!==false) foreach($emps as $emp)
+		{
+			$empresa=array("id"=>$emp["idempresa"],"razonsocial"=>$emp["razonsocial"],"sucursales"=>array());
+			$this->modempresa->setIdempresa($emp["idempresa"]);
+			$sucs=$this->modempresa->getSucursales();
+			if($sucs!==false) foreach($sucs as $suc)
+			{
+				$this->modsucursal->setIdsucursal($suc["idsucursal"]);
+				$this->modsucursal->getFromDatabase();
+				$sucursal=array("id"=>$suc["idsucursal"],"nombre"=>$this->modsucursal->getNombre(),"rutas"=>array());
+				$ruts=$this->modsucursal->getRutas();
+				if($ruts!==false) foreach($ruts as $rut)
+				{
+					$this->modruta->setIdruta($rut["idruta"]);
+					$this->modruta->getFromDatabase();
+					array_push($sucursal["rutas"],array(
+						"id"=>$rut["idruta"],
+						"nombre"=>$this->modruta->getNombre(),
+						"identificador"=>$this->modruta->getIdentificador()
+						));
+				}
+				if(count($sucursal["rutas"])>0) array_push($empresa["sucursales"],$sucursal);
+			}
+			if(count($empresa["sucursales"])>0) array_push($rutaScheme,$empresa);
+		}
 		$head=$this->load->view('html/head',array(),true);
 		$menumain=$this->load->view('menu/menumain',array(),true);
 		$body=$this->load->view('manifiestos/formulariocrearcalendario',array(
 			"menumain"=>$menumain,
 			"idempresa"=>$idempresa,
-			"idsucursal"=>$idsucursal
+			"idsucursal"=>$idsucursal,
+			"rutas"=>$rutaScheme,
 		),true);
 		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
 	}
@@ -346,7 +377,7 @@ class Manifiestos extends CI_Controller
 		$cte=$this->input->post('cliente');
 		$gen=$this->input->post('generador');
 		$ruta=$this->input->post('ruta');
-		$idcte=$this->modcliente->getIdclienteWithIdentificador($idsucursal,$cte);
+		$idcte=$this->modcliente->getIdclienteWithIdentificador(0,$cte);
 		$this->modruta->setIdruta($ruta);
 		$this->modruta->getFromDatabase();
 		if($idcte!==false)
@@ -362,7 +393,7 @@ class Manifiestos extends CI_Controller
 					"cliente"=>$this->modcliente,
 					"generador"=>$this->modgenerador,
 					"ruta"=>$this->modruta,
-					"identificador"=>$this->modmanifiesto->nextIdentificador($idsucursal),
+					"identificador"=>$this->modmanifiesto->nextIdentificador($this->modruta->getIdSucursal()),
 					"idempresa"=>$idempresa,
 					"idsucursal"=>$idsucursal
 				));
@@ -388,7 +419,7 @@ class Manifiestos extends CI_Controller
 			"cliente"=>$this->modcliente,
 			"generador"=>$this->modgenerador,
 			"ruta"=>$this->modruta,
-			"identificador"=>$this->modmanifiesto->nextIdentificador($idsucursal),
+			"identificador"=>$this->modmanifiesto->nextIdentificador($this->modruta->getIdSucursal()),
 			"idempresa"=>$idempresa,
 			"idsucursal"=>$idsucursal,
 			"bitacora"=>$bitacora
@@ -410,7 +441,7 @@ class Manifiestos extends CI_Controller
 			"cliente"=>$this->modcliente,
 			"generador"=>$this->modgenerador,
 			"ruta"=>$this->modruta,
-			"identificador"=>$this->modmanifiesto->nextIdentificador($idsucursal),
+			"identificador"=>$this->modmanifiesto->nextIdentificador($this->modruta->getIdSucursal()),
 			"idempresa"=>$idempresa,
 			"idsucursal"=>$idsucursal,
 			"bitacora"=>$bitacora,
@@ -423,13 +454,16 @@ class Manifiestos extends CI_Controller
 		$this->load->model('modgenerador');
 		$this->load->model('modmanifiesto');
 		$this->load->model('modsucursal');
+		$this->load->model('modruta');
 		$ruta=$this->input->post('ruta');
 		$bitacora=$this->input->post('bitacora');
 		$fecha=$this->input->post('fecha');
+		$this->modruta->getFromDatabase($ruta);
 		$this->load->view('manifiestos/validacreacioncalendario',array(
 			"cliente"=>$this->modcliente,
 			"generador"=>$this->modgenerador,
-			"identificador"=>$this->modmanifiesto->nextIdentificador($idsucursal),
+			"ruta"=>$this->modruta,
+			"identificador"=>$this->modmanifiesto->nextIdentificador($this->modruta->getIdSucursal()),
 			"idempresa"=>$idempresa,
 			"idsucursal"=>$idsucursal,
 			"bitacora"=>$bitacora,
@@ -526,7 +560,7 @@ class Manifiestos extends CI_Controller
 		$this->modvehiculo->setIdvehiculo($this->modruta->getIdVehiculo());
 		$this->modvehiculo->getFromDatabase();
 		$recoleccion=array();
-		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+		$residuos=$this->modresiduo->getAll($this->modruta->getIdsucursal());
 		if($residuos!==false) foreach($residuos as $res)
 		{
 			$recol=$this->modrecoleccion->getRecoleccionWithIdResiduo($idmanifiesto,$res["idresiduo"]);
@@ -574,14 +608,17 @@ class Manifiestos extends CI_Controller
 		$this->load->model("modresiduo");
 		$this->load->model("modrecoleccion");
 		$this->load->model("modcatalogo");
+		$this->load->model("modruta");
 		$this->modmanifiesto->setIdmanifiesto($idmanifiesto);
 		$this->modmanifiesto->getFromDatabase();
 		$this->modgenerador->setIdgenerador($this->modmanifiesto->getIdgenerador());
 		$this->modgenerador->getFromDatabase();
 		$this->modcliente->setIdcliente($this->modgenerador->getIdcliente());
 		$this->modcliente->getFromDatabase();
+		$this->modruta->setIdruta($this->modmanifiesto->getIdruta());
+		$this->modruta->getFromDatabase();
 		$recoleccion=array();
-		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+		$residuos=$this->modresiduo->getAll($this->modruta->getIdsucursal());
 		if($residuos!==false) foreach($residuos as $res)
 		{
 			$recol=$this->modrecoleccion->getRecoleccionWithIdResiduo($idmanifiesto,$res["idresiduo"]);
@@ -625,15 +662,18 @@ class Manifiestos extends CI_Controller
 		$this->load->model("modcliente");
 		$this->load->model("modresiduo");
 		$this->load->model("modrecoleccion");
+		$this->load->model("modruta");
 		$this->modmanifiesto->setIdmanifiesto($idmanifiesto);
 		$this->modmanifiesto->getFromDatabase();
 		$this->modgenerador->setIdgenerador($this->modmanifiesto->getIdgenerador());
 		$this->modgenerador->getFromDatabase();
 		$this->modcliente->setIdcliente($this->modgenerador->getIdcliente());
 		$this->modcliente->getFromDatabase();
+		$this->modruta->setIdruta($this->modmanifiesto->getIdRuta());
+		$this->modruta->getFromDatabase();
 		$this->modmanifiesto->setMotivo($this->input->post('frm_motivo'));
 		$this->modmanifiesto->setNoexterno($this->input->post('frm_noexterno'));
-		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+		$residuos=$this->modresiduo->getAll($this->modruta->getIdsucursal());
 		$recoleccionesActual=$this->modmanifiesto->getRecoleccionesDatabase();
 		if($recoleccionesActual!==false) foreach($recoleccionesActual as $rec)
 		{
@@ -691,6 +731,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model("modresiduo");
 		$this->load->model("modrecoleccion");
 		$this->load->model("modcatalogo");
+		$this->load->model("modruta");
 		$data=array();
 		$manif=$this->modmanifiesto->getFromIdentificador($identificador);
 		$idmanifiesto=0;
@@ -702,6 +743,8 @@ class Manifiestos extends CI_Controller
 		$this->modgenerador->getFromDatabase();
 		$this->modcliente->setIdcliente($this->modgenerador->getIdcliente());
 		$this->modcliente->getFromDatabase();
+		$this->modruta->setIdruta($this->modmanifiesto->getIdruta());
+		$this->modruta->getFromDatabase();
 		if($idmanifiesto==0||trim($idmanifiesto)=="")
 			array_push($data,"No se ha ingresado un manifiesto válido");
 		else if($this->modmanifiesto->getIdgenerador()==""||$this->modmanifiesto->getIdgenerador()==0||$this->modgenerador->getIdcliente()==""||$this->modgenerador->getIdcliente()==0)
@@ -711,7 +754,7 @@ class Manifiestos extends CI_Controller
 		else
 		{
 			$recoleccion=array();
-			$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+			$residuos=$this->modresiduo->getAll($this->modruta->getIdsucursal());
 			if($residuos!==false) foreach($residuos as $res)
 			{
 				$recol=$this->modrecoleccion->getRecoleccionWithIdResiduo($idmanifiesto,$res["idresiduo"]);
@@ -761,6 +804,7 @@ class Manifiestos extends CI_Controller
 		$this->load->model("modvehiculo");
 		$this->load->model("modresiduo");
 		$this->load->model("modrecoleccion");
+		$this->load->model("modcatalogo");
 		$manifiesto	= new Modmanifiesto();
 		$generador	= new Modgenerador();
 		$cliente	= new Modcliente();
@@ -776,7 +820,7 @@ class Manifiestos extends CI_Controller
 		$operador->getFromDatabase($ruta->getIdoperador());
 		$vehiculo->getFromDatabase($ruta->getIdvehiculo());
 		$recoleccion=array();
-		$residuos=$this->modresiduo->getAll($this->modcliente->getIdsucursal());
+		$residuos=$this->modresiduo->getAll($ruta->getIdsucursal());
 		if($residuos!==false) foreach($residuos as $res)
 		{
 			$recol=$this->modrecoleccion->getRecoleccionWithIdResiduo($idmanifiesto,$res["idresiduo"]);
@@ -838,8 +882,16 @@ class Manifiestos extends CI_Controller
 		if($generador->getReferencias()) $refs=$generador->getReferencias();
 		if($generador->getHorarioinicio()!="" || $generador->getHorariofin()!="") $hr1=$generador->getHorarioinicio()."-".$generador->getHorariofin();
 		if($generador->getHorarioinicio2()!="" || $generador->getHorariofin2()!="") $hr2=$generador->getHorarioinicio2()."-".$generador->getHorariofin2();
-		$refs.=($refs!=""?", ":"").$hr1;
-		$refs.=($refs!=""?", ":"").$hr2;
+		if($hr1!="00:00-00:00")
+		{
+			$hr1=substr($hr1,0,2).substr($hr1,5,3);
+			$refs.=($refs!=""?", ":"").$hr1;
+		}
+		if($hr2!="00:00-00:00")
+		{
+			$hr2=substr($hr2,0,2).substr($hr2,5,3);
+			$refs.=($refs!=""?", ":"").$hr2;
+		}
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_generadorreferencias");
 		$elem->appendChild($xml->createCDATASection($refs));
@@ -1056,6 +1108,19 @@ class Manifiestos extends CI_Controller
 		$elem->setAttribute("name","manifiesto_space_dest_fecha");
 		$elem->appendChild($xml->createCDATASection(DateToMx($manifiesto->getFecharecepcion())));
 		$nodoManifiesto->appendChild($elem);
+		$f="";
+		$frecuencia=$this->modcatalogo->getCatalogo(3);
+		if($frecuencia!==false) 
+			foreach($frecuencia["opciones"] as $opc) 
+				if($opc["idcatalogodet"]==$generador->getFrecuencia()) 
+				{ 
+					$f=substr($opc["descripcion"],0,2);
+					break; 
+				}
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadorfrecuencia");
+		$elem->appendChild($xml->createCDATASection($f));
+		$nodoManifiesto->appendChild($elem);
 		return $nodoManifiesto;
 	}
 	private function creaXMLManifiesto($idmanifiesto)
@@ -1067,7 +1132,460 @@ class Manifiestos extends CI_Controller
 		$doc->formatOutput=true;
 		$archivo="manifiesto_".time().".xml";
 		$doc->save($this->config->item("ruta_downloads").$archivo);
-		header("location: ".base_url("project_files/app/make_manifiesto_pdf_from_xml.php?arch=$archivo"));
+		header("location: ".base_url("project_files/app/make_manifiesto_pdf_from_xml.php?arch=$archivo&path=".base_url("manifiestos/descargar")));
+	}
+	public function descargar($archivo)
+	{
+		if($archivo!="")
+		{
+			$this->load->library('zip');
+			$this->zip->read_file($this->config->item("ruta_downloads").$archivo);
+			$this->zip->download(str_replace(".pdf",".zip",$archivo));
+		}
+	}
+	public function importar($tipo,$idempresa,$idsucursal)
+	{
+		$tipo=strtolower(trim($tipo));
+		if($tipo!="excel"&&$tipo!="formiik")
+		{
+			header("location: ".base_url('manifiestos'));
+			exit();
+		}
+		$head=$this->load->view('html/head',array(),true);
+		$menumain=$this->load->view('menu/menumain',array(),true);
+		$body=$this->load->view('manifiestos/importar'.$tipo,array(
+			"menumain"=>$menumain,
+			"idempresa"=>$idempresa,
+			"idsucursal"=>$idsucursal,
+			"tipo"=>$tipo
+			),true);
+		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
+	}
+	public function importar_exec($tipo,$idempresa,$idsucursal)
+	{
+		$tipo=strtolower(trim($tipo));
+		if($tipo!="excel"&&$tipo!="formiik")
+		{
+			header("location: ".base_url('manifiestos'));
+			exit();
+		}
+		$config["upload_path"]="./project_files/files/upload";
+		$config["allowed_types"]="xls|xlsx";
+		$config["max_size"]="0";
+		$config["max_height"]="0";
+		$config["max_width"]="0";
+		$this->load->library("upload",$config);
+		if($this->upload->do_upload("frm_importar_archivo"))
+		{
+			$archivo=$this->upload->data()["file_name"];
+			header("location: ".base_url("project_files/app/make_xml_from_excel.php?arch=$archivo&path=".base_url("manifiestos/importar_exec2/$tipo/$idempresa/$idsucursal")));
+		}
+		else
+		{
+			echo $this->upload->display_errors();
+		}
+	}
+	public function importar_exec2($tipo,$idempresa,$idsucursal,$archivo)
+	{
+		$this->load->model("modmanifiesto");
+		$this->load->model("modcliente");
+		$this->load->model("modgenerador");
+		$this->load->model("modempresa");
+		$this->load->model("modsucursal");
+		$this->load->model("modruta");
+		$this->load->model("modresiduo");
+		$this->load->model("modrecoleccion");
+		$this->load->model("modcatalogo");
+		$tipo=strtolower(trim($tipo));
+		if($tipo!="excel"&&$tipo!="formiik")
+		{
+			header("location: ".base_url('manifiestos'));
+			exit();
+		}
+		$archivo="./project_files/files/upload/$archivo";
+		if(file_exists($archivo))
+		{
+			$doc=new DOMDocument("1.0","utf-8");
+			$doc->load($archivo);
+			$manifs=array();
+			foreach($doc->getElementsByTagName('hoja') as $hoja)
+			{
+				//$hoja=new DOMElement("");
+				if(strtolower(trim($hoja->getAttribute("nombre")))!="recoleccion")
+					continue;
+				foreach($hoja->getElementsByTagName('fila') as $fila)
+				{
+					//$fila=new DOMElement("");
+					if(intval(trim($fila->getAttribute('numero')))==1||intval(trim($fila->getAttribute('numero')))==2)
+						continue;
+					array_push($manifs,$this->crearArrayDesdeFilaXML($fila,$tipo));
+				}
+			}
+			foreach($manifs as $k=>$man)
+			{
+				$status="";
+				$errors=array();
+				$warnings=array();
+				$idruta="";
+				$idcte="";
+				$idgen="";
+				$dataman=$this->modmanifiesto->getFromIdentificador($man["manif"]);
+				$tmpruta=$this->modruta->getFromNombreIdentificador($man["ruta"]);
+				$tmpcte=$this->modcliente->getIdclienteWithIdentificador(0,$man["cte"]);
+				$tmpgen=false;
+				$manifs[$k]["idcte_actual"]="";
+				$manifs[$k]["nomcte_actual"]="";
+				$manifs[$k]["identifcte_actual"]="";
+				$manifs[$k]["idgen_actual"]="";
+				$manifs[$k]["nomgen_actual"]="";
+				$manifs[$k]["identifgen_actual"]="";
+				$manifs[$k]["idruta_actual"]="";
+				$manifs[$k]["nomruta_actual"]="";
+				$manifs[$k]["identifruta_actual"]="";
+				if($tmpruta==false)
+				{
+					array_push($errors,array(1,"No existe la ruta {$man["ruta"]}. "));
+				}
+				else
+				{
+					$idruta=$tmpruta[0]["idruta"];
+					$this->modruta->setIdruta($idruta);
+					$this->modruta->getFromdatabase();
+					$manifs[$k]["idruta_actual"]=$this->modruta->getIdruta();
+					$manifs[$k]["nomruta_actual"]=$this->modruta->getNombre();
+					$manifs[$k]["identifruta_actual"]=$this->modruta->getIdentificador();
+				}
+				if($tmpcte===false)
+				{
+					array_push($errors,array(2,"No existe el cliente {$man["cte"]}. "));
+				}
+				else
+				{
+					$idcte=$tmpcte;
+					$tmpgen=$this->modgenerador->getIdgeneradoWithIdentificador($idcte,$man["gen"]);
+					$this->modcliente->setIdcliente($idcte);
+					$this->modcliente->getFromDatabase();
+					$manifs[$k]["idcte_actual"]=$this->modcliente->getIdcliente();
+					$manifs[$k]["nomcte_actual"]=$this->modcliente->getRazonsocial();
+					$manifs[$k]["identifcte_actual"]=$this->modcliente->getIdentificador();
+					if($tmpgen===false)
+					{
+						array_push($errors,array(3,"No existe el generador {$man["gen"]}. "));
+					}
+					else
+					{
+						if(count($this->modsesion->getAllGens())==0 || in_array($tmpgen,$this->modsesion->getAllGens()))
+						{
+							$idgen=$tmpgen;
+							$this->modgenerador->setIdgenerador($idgen);
+							$this->modgenerador->getFromdatabase();
+							$manifs[$k]["idgen_actual"]=$this->modgenerador->getIdgenerador();
+							$manifs[$k]["nomgen_actual"]=$this->modgenerador->getRazonsocial();
+							$manifs[$k]["identifgen_actual"]=$this->modgenerador->getIdentificador();
+						}
+						else
+						{
+							array_push($errors,array(4,"El generador {$man["cte"]} - {$man["gen"]} no pertenece al grupo de usuarios asignado. "));
+						}
+					}
+				}
+				if($dataman===false)
+				{
+					$status="noextiste";
+					array_push($warnings,array(1,"El manifiesto no existe"));
+				}
+				else
+				{
+					$this->modmanifiesto->setIdmanifiesto($dataman[0]["idmanifiesto"]);
+					$this->modmanifiesto->getFromDatabase();
+					$this->modgenerador->setIdgenerador($this->modmanifiesto->getIdgenerador());
+					$this->modgenerador->getFromDatabase();
+					$this->modcliente->setIdCliente($this->modgenerador->getIdcliente());
+					$this->modcliente->getFromDatabase();
+					$this->modruta->setIdruta($this->modmanifiesto->getIdruta());
+					$this->modruta->getFromDatabase();
+					$recs=$this->modrecoleccion->getAll($dataman[0]["idmanifiesto"]);
+					$suma=0.0;
+					if($recs!==false) foreach($recs as $rec) $suma+=floatval($rec["cantidad"]);
+					if($suma==0.0 && $this->modmanifiesto->getmotivo()=="")
+					{
+						$status="porcapturar";
+					}
+					else
+					{
+						$status="capturado";
+						array_push($warnings,array(2,"El manifiesto {$man["manif"]} ya esta capturado."));
+					}
+					if($idgen!=$this->modgenerador->getIdgenerador())
+					{
+						array_push($warnings,array(3,"El manifesto fue creado para un generador diferente al cual se esta capturando. Generado para {$this->modcliente->getIentificador()} - {$this->modgenerador->getIdentificador()}, capturando para {$man["cte"]} - {$man["gen"]}. "));
+					}
+					if($idruta!=$this->modruta->getIdruta())
+					{
+						array_push($warnings,array(4,"El manifiesto fue creado para una ruta diferente a la cual se esta capturando. Generado para la ruta {$this->modruta->getNombre()} ({$this->modruta->getIdentificador()}), capturando para {$man["ruta"]}. "));
+					}
+					$manifs[$k]["idruta_actual"]=$this->modruta->getIdruta();
+					$manifs[$k]["nomruta_actual"]=$this->modruta->getNombre();
+					$manifs[$k]["identifruta_actual"]=$this->modruta->getIdentificador();
+					$manifs[$k]["idcte_actual"]=$this->modcliente->getIdcliente();
+					$manifs[$k]["nomcte_actual"]=$this->modcliente->getRazonsocial();
+					$manifs[$k]["identifcte_actual"]=$this->modcliente->getIdentificador();
+					$manifs[$k]["idgen_actual"]=$this->modgenerador->getIdgenerador();
+					$manifs[$k]["nomgen_actual"]=$this->modgenerador->getRazonsocial();
+					$manifs[$k]["identifgen_actual"]=$this->modgenerador->getIdentificador();
+				}
+				$manifs[$k]["status"]=$status;
+				$manifs[$k]["errors"]=$errors;
+				$manifs[$k]["warnings"]=$warnings;
+			}
+			$rutaScheme=array();
+			$emps=$this->modempresa->getAll();
+			if($emps!==false) foreach($emps as $emp)
+			{
+				$empresa=array("id"=>$emp["idempresa"],"razonsocial"=>$emp["razonsocial"],"sucursales"=>array());
+				$this->modempresa->setIdempresa($emp["idempresa"]);
+				$sucs=$this->modempresa->getSucursales();
+				if($sucs!==false) foreach($sucs as $suc)
+				{
+					$this->modsucursal->setIdsucursal($suc["idsucursal"]);
+					$this->modsucursal->getFromDatabase();
+					$sucursal=array("id"=>$suc["idsucursal"],"nombre"=>$this->modsucursal->getNombre(),"rutas"=>array());
+					$ruts=$this->modsucursal->getRutas();
+					if($ruts!==false) foreach($ruts as $rut)
+					{
+						$this->modruta->setIdruta($rut["idruta"]);
+						$this->modruta->getFromDatabase();
+						array_push($sucursal["rutas"],array(
+							"id"=>$rut["idruta"],
+							"nombre"=>$this->modruta->getNombre(),
+							"identificador"=>$this->modruta->getIdentificador()
+							));
+					}
+					if(count($sucursal["rutas"])>0) array_push($empresa["sucursales"],$sucursal);
+				}
+				if(count($empresa["sucursales"])>0) array_push($rutaScheme,$empresa);
+			}
+			$head=$this->load->view('html/head',array(),true);
+			$menumain=$this->load->view('menu/menumain',array(),true);
+			$body=$this->load->view('manifiestos/importar',array(
+				"menumain"=>$menumain,
+				"idempresa"=>$idempresa,
+				"idsucursal"=>$idsucursal,
+				"rutas"=>$rutaScheme,
+				"manifiestos"=>$manifs,
+				"motivos"=>array(
+					"cobranza"=>$this->modcatalogo->getCatalogo(9),
+					"ajenos"=>$this->modcatalogo->getCatalogo(12),
+					"transporte"=>$this->modcatalogo->getCatalogo(10),
+					"ventas"=>$this->modcatalogo->getCatalogo(8),
+					"cliente"=>$this->modcatalogo->getCatalogo(11)
+					)
+			),true);
+			$this->load->view('html/html',array("head"=>$head,"body"=>$body));
+		}
+		else
+			echo "No existe el archivo $archivo";
+	}
+	private function crearArrayDesdeFilaXML(DOMElement $fila,$tipo)
+	{
+		$data=array(
+			"cte"			=>"",
+			"gen"			=>"",
+			"ruta"			=>"",
+			"manif"			=>"",
+			"fecha"			=>"",
+			"causa"			=>"",
+			"motivo"		=>"",
+			"res_sangre"	=>"",
+			"res_cultivos"	=>"",
+			"res_pato"		=>"",
+			"res_noanat"	=>"",
+			"res_punzo"		=>"",
+			"res_medcad"	=>""
+		);
+		foreach($fila->getElementsByTagName("celda") as $celda)
+		{
+			//$celda=new DOMElement("");
+			if($tipo=="excel")
+			{
+				switch($celda->getAttribute('columna'))
+				{
+					case 'A':
+						$data["cte"]=$celda->nodeValue;
+						break;
+					case 'B':
+						$data["gen"]=$celda->nodeValue;
+						break;
+					case 'C':
+						$data["ruta"]=$celda->nodeValue;
+						break;
+					case 'D':
+						$data["manif"]=$celda->nodeValue;
+						break;
+					case 'E':
+						$data["fecha"]=substr($celda->nodeValue,1,10);
+						break;
+					case 'F':
+						$data["causa"]=$celda->nodeValue;
+						break;
+					case 'G':
+						$data["motivo"]=$celda->nodeValue;
+						break;
+					case 'H':
+						$data["res_sangre"]=$celda->nodeValue;
+						break;
+					case 'I':
+						$data["res_cultivos"]=$celda->nodeValue;
+						break;
+					case 'J':
+						$data["res_pato"]=$celda->nodeValue;
+						break;
+					case 'K':
+						$data["res_noanat"]=$celda->nodeValue;
+						break;
+					case 'L':
+						$data["res_punzo"]=$celda->nodeValue;
+						break;
+					case 'M':
+						$data["res_medcad"]=$celda->nodeValue;
+						break;
+				}
+			}
+			else if($tipo=="formiik")
+			{
+				switch($celda->getAttribute('columna'))
+				{
+					case 'I':
+						$data["cte"]=$celda->nodeValue;
+						break;
+					case 'J':
+						$data["gen"]=$celda->nodeValue;
+						break;
+					case 'K':
+						$data["ruta"]=$celda->nodeValue;
+						break;
+					case 'L':
+						$data["manif"]=$celda->nodeValue;
+						break;
+					case 'M':
+						$data["fecha"]=substr($celda->nodeValue,0,10);
+						break;
+					case 'X':
+						$data["causa"]=$celda->nodeValue;
+						break;
+					case 'Y':
+						$data["motivo"]=$celda->nodeValue;
+						break;
+					case 'AA':
+						$data["res_sangre"]=$celda->nodeValue;
+						break;
+					case 'AB':
+						$data["res_cultivos"]=$celda->nodeValue;
+						break;
+					case 'AC':
+						$data["res_pato"]=$celda->nodeValue;
+						break;
+					case 'AD':
+						$data["res_noanat"]=$celda->nodeValue;
+						break;
+					case 'AE':
+						$data["res_punzo"]=$celda->nodeValue;
+						break;
+					case 'AF':
+						$data["res_medcad"]=$celda->nodeValue;
+						break;
+				}
+			}
+		}
+		return $data;
+	}
+	public function capturarImportacion()
+	{
+		$this->load->model('modmanifiesto');
+		$this->load->model('modruta');
+		$this->load->model('modrecoleccion');
+		$fecha=$this->input->post('fecha');
+		$generador=$this->input->post('generador');
+		$manifiesto=$this->input->post('manifiesto');
+		$motivo=$this->input->post('motivo');
+		$r_cc=$this->input->post('r_cc');
+		$r_medcad=$this->input->post('r_medcad');
+		$r_noanat=$this->input->post('r_noanat');
+		$r_pat=$this->input->post('r_pat');
+		$r_punzo=$this->input->post('r_punzo');
+		$r_san=$this->input->post('r_san');
+		$ruta=$this->input->post('ruta');
+		$status=$this->input->post('status');
+		$this->modruta->setIdruta($ruta);
+		$this->modruta->getFromDatabase();
+		switch($status)
+		{
+			case 'noextiste':
+				$this->modmanifiesto->setIdentificador($manifiesto);
+				$this->modmanifiesto->setFecha($fecha);
+				$this->modmanifiesto->setFechaembarque($fecha);
+				$this->modmanifiesto->setFecharecepcion($fecha);
+				$this->modmanifiesto->setIdgenerador($generador);
+				$this->modmanifiesto->setIdruta($ruta);
+				$this->modmanifiesto->setMotivo($motivo);
+				$this->modmanifiesto->addToDatabase();
+				break;
+			case 'porcapturar':
+			case 'capturado':
+				$manif=$this->modmanifiesto->getFromIdentificador($manifiesto);
+				$this->modmanifiesto->setIdmanifiesto($manif[0]["idmanifiesto"]);
+				$this->modmanifiesto->getFromDatabase();
+				$this->modmanifiesto->setFecha($fecha);
+				$this->modmanifiesto->setFechaembarque($fecha);
+				$this->modmanifiesto->setFecharecepcion($fecha);
+				$this->modmanifiesto->setIdgenerador($generador);
+				$this->modmanifiesto->setIdruta($ruta);
+				$this->modmanifiesto->setMotivo($motivo);
+				$this->modmanifiesto->updateToDatabase();
+				break;
+		}
+		$recoleccionesActual=$this->modmanifiesto->getRecoleccionesDatabase();
+		if($recoleccionesActual!==false) foreach($recoleccionesActual as $rec)
+		{
+			$this->modrecoleccion->setIdrecoleccion($rec["idrecoleccion"]);
+			$this->modrecoleccion->delete();
+		}
+		$settings=json_decode(file_get_contents($this->config->item('ruta_templates').'importa_manifiesto.json'),true);
+		foreach($settings["sucursales"] as $suc)
+		{
+			if($suc["id"]==$this->modruta->getIdSucursal())
+			{
+				$cfgResiduos=$suc["residuos"];
+				$this->modrecoleccion->setUnidad("kg");
+				$this->modrecoleccion->setIdmanifiesto($this->modmanifiesto->getIdmanifiesto());
+				foreach($cfgResiduos as $cfgres)
+				{
+					$this->modrecoleccion->setIdresiduo($cfgres["id"]);
+					switch($cfgres["nombre"])
+					{
+						case 'Cultivos y Cepas':
+							$this->modrecoleccion->setCantidad($r_cc);
+							break;
+						case 'No Anatómicos':
+							$this->modrecoleccion->setCantidad($r_noanat);
+							break;
+						case 'Objetos Punzocortantes':
+							$this->modrecoleccion->setCantidad($r_punzo);
+							break;
+						case 'Patológicos':
+							$this->modrecoleccion->setCantidad($r_pat);
+							break;
+						case 'Sangre':
+							$this->modrecoleccion->setCantidad($r_san);
+							break;
+						case 'Medicamento Caduco':
+							$this->modrecoleccion->setCantidad($r_medcad);
+							break;
+					}
+					$this->modrecoleccion->addToDatabase();
+				}
+			}
+		}
 	}
 }
 ?>

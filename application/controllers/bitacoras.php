@@ -142,6 +142,7 @@ class Bitacoras extends CI_Controller
 		$this->load->model("modvehiculo");
 		$this->load->model("modresiduo");
 		$this->load->model("modrecoleccion");
+		$this->load->model("modcatalogo");
 		$manifiesto	= new Modmanifiesto();
 		$generador	= new Modgenerador();
 		$cliente	= new Modcliente();
@@ -219,8 +220,16 @@ class Bitacoras extends CI_Controller
 		if($generador->getReferencias()) $refs=$generador->getReferencias();
 		if($generador->getHorarioinicio()!="" || $generador->getHorariofin()!="") $hr1=$generador->getHorarioinicio()."-".$generador->getHorariofin();
 		if($generador->getHorarioinicio2()!="" || $generador->getHorariofin2()!="") $hr2=$generador->getHorarioinicio2()."-".$generador->getHorariofin2();
-		$refs.=($refs!=""?", ":"").$hr1;
-		$refs.=($refs!=""?", ":"").$hr2;
+		if($hr1!="00:00-00:00")
+		{
+			$hr1=substr($hr1,0,2).substr($hr1,5,3);
+			$refs.=($refs!=""?", ":"").$hr1;
+		}
+		if($hr2!="00:00-00:00")
+		{
+			$hr2=substr($hr2,0,2).substr($hr2,5,3);
+			$refs.=($refs!=""?", ":"").$hr2;
+		}
 		$elem=$xml->createElement("data");
 		$elem->setAttribute("name","manifiesto_space_generadorreferencias");
 		$elem->appendChild($xml->createCDATASection($refs));
@@ -437,6 +446,19 @@ class Bitacoras extends CI_Controller
 		$elem->setAttribute("name","manifiesto_space_dest_fecha");
 		$elem->appendChild($xml->createCDATASection(DateToMx($manifiesto->getFecharecepcion())));
 		$nodoManifiesto->appendChild($elem);
+		$f="";
+		$frecuencia=$this->modcatalogo->getCatalogo(3);
+		if($frecuencia!==false) 
+			foreach($frecuencia["opciones"] as $opc) 
+				if($opc["idcatalogodet"]==$generador->getFrecuencia()) 
+				{ 
+					$f=substr($opc["descripcion"],0,2);
+					break; 
+				}
+		$elem=$xml->createElement("data");
+		$elem->setAttribute("name","manifiesto_space_generadorfrecuencia");
+		$elem->appendChild($xml->createCDATASection($f));
+		$nodoManifiesto->appendChild($elem);
 		return $nodoManifiesto;
 	}
 	public function creaPDFBitacora($idbitacora)
@@ -452,7 +474,7 @@ class Bitacoras extends CI_Controller
 		$doc->formatOutput=true;
 		$archivo="manifiesto_".time().".xml";
 		$doc->save($this->config->item("ruta_downloads").$archivo);
-		header("location: ".base_url("project_files/app/make_manifiesto_pdf_from_xml.php?arch=$archivo"));
+		header("location: ".base_url("project_files/app/make_manifiesto_pdf_from_xml.php?arch=$archivo&path=".base_url("bitacoras/descargar")));
 	}
 	public function imprimirbit($idbitacora)
 	{
@@ -501,6 +523,15 @@ class Bitacoras extends CI_Controller
 		$archivo="bitacora_".time().".xml";
 		$doc->save($this->config->item("ruta_downloads").$archivo);
 		header("location: ".base_url("project_files/app/make_bitacora_pdf_from_xml.php?arch=$archivo"));
+	}
+	public function descargar($archivo)
+	{
+		if($archivo!="")
+		{
+			$this->load->library('zip');
+			$this->zip->read_file($this->config->item("ruta_downloads").$archivo);
+			$this->zip->download(str_replace(".pdf",".zip",$archivo));
+		}
 	}
 }
 ?>

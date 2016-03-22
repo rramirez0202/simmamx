@@ -6,6 +6,7 @@ $dir_out        = "../files/download/";
 $dir_template   = "../files/templates/";
 $archivo        = (isset($_GET["arch"]) && $_GET["arch"]!="" && file_exists($dir_in.$_GET["arch"])?$_GET["arch"]:"");
 $coords			= (file_exists($dir_template."coordenadas_manifiesto.json")?json_decode(file_get_contents($dir_template."coordenadas_manifiesto.json"),true):"");
+$path        	= (isset($_GET["path"]) && $_GET["path"]!=""?$_GET["path"]:"");
 
 if($archivo!="" && $coords!="")
 {
@@ -16,13 +17,15 @@ if($archivo!="" && $coords!="")
     {
 		AgregaManifiesto($pdf,$manifiesto,$coords);
     }
-    $pdf->Output();
+    $archivo="Manifiestos_".time().".pdf";
+    $pdf->Output($dir_out.$archivo,"F");
+	header("location: $path/$archivo");
 }
 
 function AgregaManifiesto(MyPDFFile &$pdf,DOMElement $nodoManifiesto,$coords)
 {
 	$pdf->AddPage("P","Letter");
-	$pdf->SetFont("Times","",9);
+	$pdf->SetFont("Arial","",9.5);
 	$pdf->SetMargins(0,0,0);
 	$pdf->SetAutoPageBreak(false,0);
 	$generalX=$coords["general"]["posicion"]["x"];
@@ -35,7 +38,7 @@ function AgregaManifiesto(MyPDFFile &$pdf,DOMElement $nodoManifiesto,$coords)
 		if($pos!==false && is_array($pos))
 		{
 			$cont=utf8_decode($cont);
-			$pdf->Text($pos[0]+$generalX,$pos[1]+$generalY,$cont);
+			$pdf->Texto($pos[0]+$generalX,$pos[1]+$generalY,$cont);
 		}
 	}
 }

@@ -82,5 +82,34 @@ class Reporte extends CI_Controller
 			$this->zip->download(str_replace(".xlsx",".zip",$archivo));
 		}
 	}
+	public function obtieneIndicador($archivo)
+	{
+		if($archivo!="" && !file_exists($this->config->item('ruta_templates')."indicadores/$archivo"))
+		{
+			return "";
+		}
+		$indicador=json_decode(file_get_contents($this->config->item('ruta_templates')."indicadores/$archivo"),true);
+		$this->load->model("modreporte");
+		$this->modreporte->setIdreporte(15000);
+		$this->modreporte->setParametros('abc');
+		$this->modreporte->setSQL($indicador["sql"]);
+		$ind=array(
+			"archivo"=>$archivo,
+			"nombre"=>$indicador["nombre"],
+			"idpanel"=>'indicador_'.explode(".",$archivo)[0],
+			"idcanvas"=>'canvas_'.explode(".",$archivo)[0],
+			"tipo"=>$indicador["tipo"],
+			"data"=>$this->modreporte->execute(),
+			"basicSQL"=>$indicador["sql"],
+			"execSQL"=>$this->db->last_query()
+			);
+		foreach($ind["data"] as $k=>$elem)
+		{
+			$mes=array("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre");
+			$month=array("January","February","March","April","May","June","July","August","September","October","November","December");
+			$ind["data"][$k]["Item"]=str_replace($month,$mes,$elem["Item"]);
+		}
+		echo json_encode($ind);
+	}
 }
 ?>

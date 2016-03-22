@@ -236,5 +236,14 @@ class Modruta extends CI_Model
 			return false;
 		return $regs->result_array();
 	}
+	public function getFromNombreIdentificador($dato)
+	{
+		$this->db->where("nombre = '$dato' or identificador = '$dato' ");
+		$this->db->order_by('nombre');
+		$regs=$this->db->get('ruta');
+		if($regs->num_rows()==0)
+			return false;
+		return $regs->result_array();
+	}
 }
 ?>

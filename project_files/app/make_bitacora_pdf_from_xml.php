@@ -12,74 +12,14 @@ if($archivo!="" && $coords!="")
 	$xml			= new DOMDocument();
     $xml->load($dir_in.$archivo);
     $pdf			= new MyPDFFile("L","mm","Letter");
-    $pdf->SetFont("Arial","",10);
+    $pdf->SetFont("Arial","",9.5);
     $pdf->SetMargins(7,10,7);
     $pdf->SetAutoPageBreak(true,10);
-    $pdf->AddPage("L","Letter");
-    $pdf->Cell(0,10,utf8_decode("BITÁCORA DE SERVICIOS"),0,1,'C');
-    $pdf->Ln(10);
-    $ancho=$pdf->CurPageSize[1]-20;
-    $pdf->Cell($ancho-130,5);
-    $pdf->Cell(20,5,utf8_decode("Ruta"),0,0,'R');
-    foreach($xml->getElementsByTagName('bitacora_ruta_identificador') as $nodo)
-    {
-    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,0,'C');
-    	break;
-	}
-	$pdf->Cell(10,5);
-    $pdf->Cell(20,5,utf8_decode("Folio"),0,0,'R');
-    foreach($xml->getElementsByTagName('bitacora_folio') as $nodo)
-    {
-    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,1,'C');
-    	break;
-	}
-    $pdf->Cell($ancho-130,5);
-    $pdf->Cell(20,5,utf8_decode("Nombre"),0,0,'R');
-    foreach($xml->getElementsByTagName('bitacora_ruta_nombre') as $nodo)
-    {
-    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,0,'C');
-    	break;
-	}
-	$pdf->Cell(10,5);
-    $pdf->Cell(20,5,utf8_decode("Fecha"),0,0,'R');
-    foreach($xml->getElementsByTagName('bitacora_fecha') as $nodo)
-    {
-    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,1,'C');
-    	break;
-	}
-	$pdf->Ln(10);
-	$pdf->Cell(10,5);
-	foreach($xml->getElementsByTagName('bitacora_operador') as $nodo)
-    {
-    	$pdf->Cell(0,5,utf8_decode("Nombre del Operador: ".$nodo->nodeValue),0,1,'L');
-    	break;
-	}
-	$pdf->Ln(5);
-	$pdf->Image("../img/sistema/simma_printer.png",10,10,87.5);
-	$pdf->SetFillColor(150,150,150);
-	$pdf->SetFont("","B",6);
-	$pdf->SetWidths(array(7,10,9,13,50,10,10,40,15,18,15,15,15,15,25));
-	$pdf->SetAligns(array("C","C","C","C"));
-	$pdf->Row(array(
-		"\nNo.",
-		"No. de Cliente",
-		"No. de Gen.",
-		"No. de Manif.",
-		"\nNombre del Cliente",
-		"Hora de Llegada",
-		"Hora de Salida", 
-		"\nResposanble Generador",
-		"Cultivos y Cepas",
-		"Objetos Punzocortantes",
-		"\nPatológico",
-		"No Anatómico",
-		"\nSangre",
-		"Total de Kilos",
-		"\nFirma del Cliente"
-	),true);
+    CreaEncabezadoPagina($pdf,$xml);
     foreach($xml->getElementsByTagName("manifiesto") as $k=>$manifiesto)
     {
-    	$data=array($k);
+    	$fila=$k+1;
+    	$data=array($fila);
 		foreach($manifiesto->getElementsByTagName('data') as $nodo)
 	    {
 	    	if($nodo->getAttribute('name')=="manifiesto_space_nocte")
@@ -114,7 +54,14 @@ if($archivo!="" && $coords!="")
 		}
 		array_push($data,"\n\n");
 		array_push($data,"");
-		array_push($data,"");
+		foreach($manifiesto->getElementsByTagName('data') as $nodo)
+	    {
+	    	if($nodo->getAttribute('name')=="manifiesto_space_cetificacion")
+	    	{
+				array_push($data,$nodo->nodeValue);
+				break;
+	    	}
+		}
 		array_push($data,"");
 		array_push($data,"");
 		array_push($data,"");
@@ -123,9 +70,18 @@ if($archivo!="" && $coords!="")
 		array_push($data,"");
 		array_push($data,"");
 		$pdf->Row($data);
+		if($fila % 10 == 0)
+		{
+			CreaEncabezadoPagina($pdf,$xml);
+		}
     }
+    if($fila % 10 == 0)
+    {
+    	CreaEncabezadoPagina($pdf,$xml,false);
+	}
+    else
+    	$pdf->Ln(5);
     $pdf->SetFont("","",8);
-    $pdf->Ln(5);
     $pdf->Cell(7,10);
     $pdf->Cell(30,10,utf8_decode("KM. Inicial"),1,0,"C");
     $pdf->Cell(15,10,"",1);
@@ -167,5 +123,75 @@ if($archivo!="" && $coords!="")
     $pdf->Cell(192,10);
     $pdf->Cell(70,5,utf8_decode("Favor de marcar los manifiestos recibidos en bitácora"),0,1,"C");
     $pdf->Output();
+}
+
+function CreaEncabezadoPagina(MyPDFFile $pdf, DOMDocument $xml,$encabezados=true)
+{
+	$pdf->AddPage("L","Letter");
+	$pdf->SetFont("Arial","",9.5);
+	$pdf->Cell(0,10,utf8_decode("BITÁCORA DE SERVICIOS"),0,1,'C');
+	$pdf->Ln(10);
+	$ancho=$pdf->CurPageSize[1]-20;
+	$pdf->Cell($ancho-130,5);
+	$pdf->Cell(20,5,utf8_decode("Ruta"),0,0,'R');
+	foreach($xml->getElementsByTagName('bitacora_ruta_identificador') as $nodo)
+	{
+    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,0,'C');
+    	break;
+	}
+	$pdf->Cell(10,5);
+	$pdf->Cell(20,5,utf8_decode("Folio"),0,0,'R');
+	foreach($xml->getElementsByTagName('bitacora_folio') as $nodo)
+	{
+    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,1,'C');
+    	break;
+	}
+	$pdf->Cell($ancho-130,5);
+	$pdf->Cell(20,5,utf8_decode("Nombre"),0,0,'R');
+	foreach($xml->getElementsByTagName('bitacora_ruta_nombre') as $nodo)
+	{
+    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,0,'C');
+    	break;
+	}
+	$pdf->Cell(10,5);
+	$pdf->Cell(20,5,utf8_decode("Fecha"),0,0,'R');
+	foreach($xml->getElementsByTagName('bitacora_fecha') as $nodo)
+	{
+    	$pdf->Cell(40,5,utf8_decode($nodo->nodeValue),1,1,'C');
+    	break;
+	}
+	$pdf->Ln(10);
+	$pdf->Cell(10,5);
+	foreach($xml->getElementsByTagName('bitacora_operador') as $nodo)
+	{
+    	$pdf->Cell(0,5,utf8_decode("Nombre del Operador: ".$nodo->nodeValue),0,1,'L');
+    	break;
+	}
+	$pdf->Ln(5);
+	$pdf->Image("../img/sistema/simma_printer.png",10,10,87.5);
+	if($encabezados)
+	{
+		$pdf->SetFillColor(150,150,150);
+		$pdf->SetFont("","B",6);
+		$pdf->SetWidths(array(7,10,9,13,50,10,10,40,15,18,15,15,15,15,25));
+		$pdf->SetAligns(array("C","C","C","C"));
+		$pdf->Row(array(
+			"\nNo.",
+			"No. de Cliente",
+			"No. de Gen.",
+			"No. de Manif.",
+			"\nNombre del Cliente",
+			"Hora de Llegada",
+			"Hora de Salida", 
+			"\nResposanble Generador",
+			"Cultivos y Cepas",
+			"Objetos Punzocortantes",
+			"\nPatológico",
+			"No Anatómico",
+			"\nSangre",
+			"Total de Kilos",
+			"\nFirma del Cliente"
+		),true);
+	}
 }
 ?>
