@@ -229,6 +229,10 @@
 					<?php endforeach; ?>
 				</select>
 			</div>
+			<label for="frm_cliente_referenciabancaria" class="col-sm-2 control-label">Referencia Bancaria</label>
+			<div class="col-sm-4">
+				<input type="text" class="form-control" id="frm_cliente_referenciabancaria" name="frm_cliente_referenciabancaria" value="<?= $objeto->getReferenciabancaria(); ?>" placeholder="" />
+			</div>
 		</div>
 		<div class="form-group">
 			<label for="frm_cliente_cobranzacontacto" class="col-sm-2 control-label">Contacto</label>

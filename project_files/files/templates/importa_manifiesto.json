@@ -1,0 +1,99 @@
+{
+	"descripcion":"Plantilla para importar manifiestos desde formik",
+	"sucursales":
+	[
+		{
+			"id":"5",
+			"nombre":"SIMMA Chiapas",
+			"residuos":
+			[
+				{
+					"id":"11",
+					"nombre":"Cultivos y Cepas"
+				},
+				{
+					"id":"14",
+					"nombre":"No Anatómicos"
+				},
+				{
+					"id":"12",
+					"nombre":"Objetos Punzocortantes"
+				},
+				{
+					"id":"13",
+					"nombre":"Patológicos"
+				},
+				{
+					"id":"15",
+					"nombre":"Sangre"
+				},
+				{
+					"id":"21",
+					"nombre":"Medicamento Caduco"
+				}
+			]
+		},
+		{
+			"id":"4",
+			"nombre":"SIMMA Guadalajara",
+			"residuos":
+			[
+				{
+					"id":"6",
+					"nombre":"Cultivos y Cepas"
+				},
+				{
+					"id":"9",
+					"nombre":"No Anatómicos"
+				},
+				{
+					"id":"7",
+					"nombre":"Objetos Punzocortantes"
+				},
+				{
+					"id":"8",
+					"nombre":"Patológicos"
+				},
+				{
+					"id":"10",
+					"nombre":"Sangre"
+				},
+				{
+					"id":"22",
+					"nombre":"Medicamento Caduco"
+				}
+			]
+		},
+		{
+			"id":"1",
+			"nombre":"SIMMA Polanco",
+			"residuos":
+			[
+				{
+					"id":"1",
+					"nombre":"Cultivos y Cepas"
+				},
+				{
+					"id":"4",
+					"nombre":"No Anatómicos"
+				},
+				{
+					"id":"2",
+					"nombre":"Objetos Punzocortantes"
+				},
+				{
+					"id":"3",
+					"nombre":"Patológicos"
+				},
+				{
+					"id":"5",
+					"nombre":"Sangre"
+				},
+				{
+					"id":"23",
+					"nombre":"Medicamento Caduco"
+				}
+			]
+		}
+	]
+}

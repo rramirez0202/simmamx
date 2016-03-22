@@ -255,12 +255,47 @@ class Generadores extends CI_Controller
 		$this->load->model("modgenerador");
 		$this->modgenerador->setIdgenerador($id);
 		$fechas=$this->input->post("fechas");
+		$delOtherDates=$this->input->post("delOtherDates");
 		if($fechas!==false && is_array($fechas) && count($fechas)>0)
 		{
-			$this->modgenerador->eliminaFechasCalendario();
+			if($delOtherDates=="1")
+				$this->modgenerador->eliminaFechasCalendario();
 			foreach($fechas as $fecha)
 				if($fecha!="")
 					$this->modgenerador->agregaFechaCalendario(0,$fecha);
+		}
+	}
+	public function getjson($data="")
+	{
+		$this->load->model('modgenerador');
+		if($data=="")
+		{
+			echo json_encode($this->modgenerador->getAll(0));
+		}
+		else
+		{
+			list($campo,$valor)=explode("=",$data);
+			$campo=strtolower(trim($campo));
+			if($campo=="cliente")
+				echo json_encode($this->modgenerador->getAll($valor));
+			else if(strpos($campo,"_equal"))
+			{
+				if($campo=="identificador_equal")
+				{
+					list($cte,$identificador)=explode(",",$valor);
+					$id=$this->modgenerador->getIdgeneradoWithIdentificador($cte,$identificador);
+					if($id!==false)
+					{
+						$this->modgenerador->setIdgenerador($id);
+						$this->modgenerador->getFromDatabase();
+						echo $this->modgenerador->asJSON();
+					}
+				}
+			}
+			else
+			{
+				echo json_encode($this->modgenerador->getAllFiltered(array($campo=>$valor)));
+			}
 		}
 	}
 }
