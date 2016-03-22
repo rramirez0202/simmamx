@@ -81,6 +81,64 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<div class="col-sm-2">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciolunes" name="frm_ruta_serviciolunes" <?= ($objeto->getServiciolunes()==1?'checked="checked"':''); ?> />
+						Lunes
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciomartes" name="frm_ruta_serviciomartes" <?= ($objeto->getServiciomartes()==1?'checked="checked"':''); ?> />
+						Martes
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciomiercoles" name="frm_ruta_serviciomiercoles" <?= ($objeto->getServiciomiercoles()==1?'checked="checked"':''); ?> />
+						Miércoles
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciojueves" name="frm_ruta_serviciojueves" <?= ($objeto->getServiciojueves()==1?'checked="checked"':''); ?> />
+						Jueves
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_servicioviernes" name="frm_ruta_servicioviernes" <?= ($objeto->getServicioviernes()==1?'checked="checked"':''); ?> />
+						Viernes
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-1">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciosabado" name="frm_ruta_serviciosabado" <?= ($objeto->getServiciosabado()==1?'checked="checked"':''); ?> />
+						Sabado
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-1">
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" value="1" id="frm_ruta_serviciodomingo" name="frm_ruta_serviciodomingo" <?= ($objeto->getServiciodomingo()==1?'checked="checked"':''); ?> />
+						Domingo
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
 			<div class="col-sm-8"></div>
 			<div class="col-sm-2">
                 <button type="button" class="btn btn-success" onclick="Ruta.Enviar(<?= ($objeto->getIdruta()!="" && $objeto->getIdruta()!=0?'false':'true'); ?>)" >Guardar</button>

@@ -23,12 +23,14 @@ class Usuarios extends CI_Controller
 	{
 		$this->load->model('modusuario');
 		$this->load->model('modperfil');
+		$this->load->model('modgrupo');
 		$head=$this->load->view('html/head',array(),true);
 		$menumain=$this->load->view('menu/menumain',array(),true);
 		$body=$this->load->view('usuarios/formulario',array(
 			"menumain"=>$menumain,
 			"objeto"=>$this->modusuario,
-			"perfiles"=>$this->modperfil->getAll()
+			"perfiles"=>$this->modperfil->getAll(),
+			"grupos"=>$this->modgrupo->getAll()
 			),true);
 		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
 	}
@@ -97,13 +99,15 @@ class Usuarios extends CI_Controller
 	{
 		$this->load->model('modusuario');
 		$this->load->model('modperfil');
+		$this->load->model('modgrupo');
 		$this->modusuario->getFromDatabase($id);
 		$head=$this->load->view('html/head',array(),true);
 		$menumain=$this->load->view('menu/menumain',array(),true);
 		$body=$this->load->view('usuarios/vista',array(
 			"menumain"=>$menumain,
 			"objeto"=>$this->modusuario,
-			"perfiles"=>$this->modperfil->getAll()
+			"perfiles"=>$this->modperfil->getAll(),
+			"grupos"=>$this->modgrupo->getAll()
 			),true);
 		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
 		$this->modsesion->addLog(
@@ -118,13 +122,15 @@ class Usuarios extends CI_Controller
 	{
 		$this->load->model('modusuario');
 		$this->load->model('modperfil');
+		$this->load->model('modgrupo');
 		$this->modusuario->getFromDatabase($id);
 		$head=$this->load->view('html/head',array(),true);
 		$menumain=$this->load->view('menu/menumain',array(),true);
 		$body=$this->load->view('usuarios/formulario',array(
 			"menumain"=>$menumain,
 			"objeto"=>$this->modusuario,
-			"perfiles"=>$this->modperfil->getAll()
+			"perfiles"=>$this->modperfil->getAll(),
+			"grupos"=>$this->modgrupo->getAll()
 			),true);
 		$this->load->view('html/html',array("head"=>$head,"body"=>$body));
 	}

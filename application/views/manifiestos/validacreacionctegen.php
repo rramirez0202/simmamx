@@ -28,7 +28,7 @@ $ruta=new Modruta();*/
 	<div class="form-group">
 		<label for="frm_validacion_identificador" class="col-sm-2 control-label">No. de Manifiesto</label>
 		<div class="col-sm-10">
-			<input type="text" class="form-control" id="frm_validacion_identificador" name="frm_validacion_identificador" value="<?= $identificador; ?>" readonly="readonly" maxlength="19" />
+			<input type="text" class="form-control" id="frm_validacion_identificador" name="frm_validacion_identificador" value="<?= $identificador; ?>" maxlength="19" />
 		</div>
 	</div>
 	<div class="form-group">

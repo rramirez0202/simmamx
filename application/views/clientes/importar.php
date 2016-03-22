@@ -19,7 +19,7 @@
 		</div>
 	</form>
 	<div class="alert alert-info">
-		El archivo a descargar requiere un formato especifico el cual puedes descargar haciendo clic
+		El archivo a cargar requiere un formato especifico el cual puedes descargar haciendo clic
 		<a href="<?= base_url("project_files/files/templates/clientes.xlsx?date=".time())?>"> aquí</a>.
 	</div>
 </div>

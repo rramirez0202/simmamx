@@ -17,6 +17,9 @@ $generador=new Modgenerador();
 			<p class="form-control-static"><?= $bitacora ?></p>
 		</div>
 	</div>
+	<div class="form-group">
+		<div class="col-sm-6"></div>
+	</div>
 	<div class="table-responsive">
 		<table class="table table-striped table-hover">
 			<thead>
@@ -55,7 +58,7 @@ $generador=new Modgenerador();
 						</tr>
 						<?php
 						$sucAux=new Modsucursal();
-						$sucAux->getFromDatabase($idsucursal);
+						$sucAux->getFromDatabase($ruta->getIdsucursal());
 						$identificador=str_replace($sucAux->getIniciales(),"",$identificador)+1;
 						$identificador=$sucAux->getIniciales().$identificador;
 					}

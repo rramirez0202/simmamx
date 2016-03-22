@@ -10,6 +10,7 @@ class Modusuario extends CI_Model
 	private $perfiles;
 	private $email;
 	private $activo;
+	private $grupos;
 	public function __construct()
 	{
 		parent::__construct();
@@ -22,6 +23,7 @@ class Modusuario extends CI_Model
 		$this->perfiles=array();
 		$this->email="";
 		$this->activo=0;
+		$this->grupos=array();
 	}
 	public function getIdusuario() { return $this->idusuario; }
 	public function getNombre() { return $this->nombre; }
@@ -32,6 +34,7 @@ class Modusuario extends CI_Model
 	public function getPerfiles() { return $this->perfiles; }
 	public function getEmail() { return $this->email; }
 	public function getActivo() { return $this->activo; }
+	public function getGrupos() { return $this->grupos; }
 	public function setIdusuario($valor) { $this->idusuario= intval($valor); }
 	public function setNombre($valor) { $this->nombre= "".$valor; }
 	public function setApaterno($valor) { $this->apaterno= "".$valor; }
@@ -41,6 +44,7 @@ class Modusuario extends CI_Model
 	public function setPerfiles($valor) { if(is_array($valor)) $this->perfiles=$valor; else array_push($this->perfiles,$valor); }
 	public function setEmail($valor) { $this->email= "".$valor; }
 	public function setActivo($valor) { $this->activo= intval($valor); }
+	public function setGrupos($valor) { if(is_array($valor)) $this->grupos=$valor; else array_push($this->grupos,$valor); }
 	public function getFromDatabase($id=0)
 	{
 		if($this->idusuario==""||$this->idusuario==0)
@@ -72,6 +76,15 @@ class Modusuario extends CI_Model
 				$this->setPerfiles($reg["idperfil"]);
 		}
 		else $this->setPerfiles(array());
+		$this->db->where('idusuario',$this->idusuario);
+		$regs=$this->db->get('relgruusu');
+		if($regs->num_rows()>0)
+		{
+			$regs=$regs->result_array();
+			foreach($regs as $reg)
+				$this->setGrupos($reg["idgrupo"]);
+		}
+		else $this->setGrupos(array());
 		return true;
 	}
 	public function getFromInput()
@@ -85,6 +98,7 @@ class Modusuario extends CI_Model
 		$this->setPerfiles($this->input->post("frm_usuario_perfiles"));
 		$this->setEmail($this->input->post("frm_usuario_email"));
 		$this->setActivo($this->input->post("frm_usuario_activo"));
+		$this->setGrupos($this->input->post("frm_usuario_grupos"));
 		return true;
 	}
 	public function addToDatabase()
@@ -103,6 +117,11 @@ class Modusuario extends CI_Model
 		if(is_array($this->perfiles) && count($this->perfiles)>0) foreach($this->perfiles as $reg) if($reg>0)
 			$this->db->insert('relperusu',array(
 				"idperfil"=>$reg,
+				"idusuario"=>$this->idusuario
+			));
+		if(is_array($this->grupos) && count($this->grupos)>0) foreach($this->grupos as $reg) if($reg>0)
+			$this->db->insert('relgruusu',array(
+				"idgrupo"=>$reg,
 				"idusuario"=>$this->idusuario
 			));
 	}
@@ -132,6 +151,13 @@ class Modusuario extends CI_Model
 				"idperfil"=>$reg,
 				"idusuario"=>$this->idusuario
 			));
+		$this->db->where('idusuario',$this->idusuario);
+		$this->db->delete('relgruusu');
+		if(is_array($this->grupos) && count($this->grupos)>0) foreach($this->grupos as $reg) if($reg>0)
+			$this->db->insert('relgruusu',array(
+				"idgrupo"=>$reg,
+				"idusuario"=>$this->idusuario
+			));
 		return true;
 	}
 	public function getAll()
@@ -144,7 +170,7 @@ class Modusuario extends CI_Model
 	}
 	public function delete($id=0)
 	{
-		//Elimina la relacion con el perfil pero lo deja vivo
+		//Elimina la relacion con el perfil y grupo pero lo deja vivo
 		if($this->idusuario==""||$this->idusuario==0)
 		{
 			if($id>0)
@@ -153,7 +179,7 @@ class Modusuario extends CI_Model
 				return false;
 		}
 		$this->db->where('idusuario',$this->idusuario);
-		$this->db->delete(array('relperusu','usuario'));
+		$this->db->delete(array('relgruusu','relperusu','usuario'));
 	}
 	public function generaPassword()
 	{

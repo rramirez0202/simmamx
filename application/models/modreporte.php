@@ -157,7 +157,8 @@ class Modreporte extends CI_Model
 			switch($op)
 			{
 				case 'LIKE':
-					$whr.=(trim($whr)!=""?" AND ":"")."{$p["campo"]} LIKE '%{$p["valor"]}%' ";
+					if($p["valor"]!="")
+						$whr.=(trim($whr)!=""?" AND ":"")."{$p["campo"]} LIKE '%{$p["valor"]}%' ";
 					break;
 				case '>':
 				case '>=':
@@ -171,13 +172,35 @@ class Modreporte extends CI_Model
 					break;
 			}
 		}
-		return "WHERE ".$whr;
+		if($whr!="")
+			return "WHERE ".$whr;
+		return "WHERE TRUE";
 	}
 	public function makeSQL()
 	{
 		if($this->idreporte==0 || $this->idreporte=="" || $this->parametros=="")
 			return false;
-		return str_replace("__WHR__",$this->makeWhr(),$this->sql);
+		$whrString=$this->makeWhr();
+		if(strpos($this->sql," generador AS gen")!==false && strpos($this->sql," generador AS gen")>=0 && count($this->modsesion->getAllGens())>0)
+		{
+			if(strpos($whrString,"WHERE TRUE")!==false && strpos($whrString,"WHERE TRUE")>=0)
+			{
+				$whrString=str_replace("WHERE TRUE","WHERE gen.idgenerador IN (".implode(",",$this->modsesion->getAllGens()).")",$whrString);
+			}
+			else
+				$whrString.="AND gen.idgenerador IN (".implode(",",$this->modsesion->getAllGens()).")";
+		}
+		else if(strpos($this->sql," cliente AS cl")!==false && strpos($this->sql," cliente AS cl")>=0 && count($this->modsesion->getAllCtes())>0)
+		{
+			if(strpos($whrString,"WHERE TRUE")!==false && strpos($whrString,"WHERE TRUE")>=0)
+			{
+				$whrString=str_replace("WHERE TRUE","WHERE cl.idcliente IN (".implode(",",$this->modsesion->getAllCtes()).")",$whrString);
+			}
+			else
+				$whrString.="AND cl.idcliente IN (".implode(",",$this->modsesion->getAllCtes()).")";
+		}
+		$sqlString=str_replace("__WHR__",$whrString,$this->sql);
+		return $sqlString;
 	}
 	public function execute()
 	{

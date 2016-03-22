@@ -31,6 +31,7 @@
 		<table class="table table-striped table-hover">
 			<thead>
 				<tr>
+					<th>Folio</th>
 					<th>Nombre</th>
 					<th>Fecha</th>
 					<th>Ruta</th>
@@ -38,6 +39,7 @@
 			</thead>
 			<tfoot>
 				<tr>
+					<th>Folio</th>
 					<th>Nombre</th>
 					<th>Fecha</th>
 					<th>Ruta</th>
@@ -50,10 +52,13 @@
 							<?php if($this->modsesion->hasPermisoHijo(95)): ?>
 							<a href="<?= base_url('bitacoras/ver/'.$bitacora["idbitacora"]); ?>">
 							<?php endif; ?>
-								<?= $bitacora["nombre"]; ?>
+								<?= ($bitacora["identificador"]!=""?$bitacora["identificador"]:"Id: ".$bitacora["idbitacora"]); ?>
 							<?php if($this->modsesion->hasPermisoHijo(95)): ?>
 							</a>
 							<?php endif; ?>
+						</td>
+						<td>
+							<?= $bitacora["nombre"]; ?>
 						</td>
 						<td><?= DateToMx($bitacora["fecha"]); ?></td>
 						<td>

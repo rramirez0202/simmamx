@@ -11,6 +11,8 @@ $vehiculo=new Modvehiculo();*/
 
 $sucursal->setIdsucursal($cliente->getIdsucursal());
 $sucursal->getFromDatabase();
+
+$total=0.0;
 ?>
 <div class="container">
 	<div class="btn-toolbar pull-right" role="toolbar">
@@ -42,7 +44,7 @@ $sucursal->getFromDatabase();
 			<?php endif; ?>
 		</div>
 	</div>
-	<h3>Manifiesto <small><?= $manifiesto->getIdentificador(); ?></small></h3>
+	<h3>Manifiesto <small><?= $manifiesto->getIdentificador().($manifiesto->getNoexterno()!=""?" (No. Externo: {$manifiesto->getNoexterno()})":""); ?></small></h3>
 	<form class="form-horizontal" role="form" id="frm_manifiesto">
 		<h5>Generador</h5>
 		<div class="form-group">
@@ -141,10 +143,16 @@ $sucursal->getFromDatabase();
 							<td><?= $r["residuo"]["nombre"]; ?></td>
 							<!--<td><?= ($r["recoleccion"]!==false?$r["recoleccion"]["contenedorcapacidad"]:""); ?></td>
 							<td><?= ($r["recoleccion"]!==false?$r["recoleccion"]["contenedortipo"]:""); ?></td>-->
-							<td><?= ($r["recoleccion"]!==false?$r["recoleccion"]["cantidad"]:""); ?></td>
+							<td class="numero"><?= ($r["recoleccion"]!==false?$r["recoleccion"]["cantidad"]:""); ?></td>
 							<!--<td><?= ($r["recoleccion"]!==false?$r["recoleccion"]["unidad"]:""); ?></td>-->
 						</tr>
-					<?php endif; ?>
+					<?php 
+					$total+=floatval(($r["recoleccion"]!==false?$r["recoleccion"]["cantidad"]:"0"));
+					endif; ?>
+					<tr>
+						<td><strong>Total</strong></td>
+						<td class="numero"><strong><?= number_format($total,3); ?></strong></td>
+					</tr>
 				</tbody>
 			</table>
 		</div>

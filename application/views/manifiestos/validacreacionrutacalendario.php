@@ -62,7 +62,7 @@ $generador=new Modgenerador();
 						</tr>
 						<?php
 						$sucAux=new Modsucursal();
-						$sucAux->getFromDatabase($idsucursal);
+						$sucAux->getFromDatabase($ruta->getIdsucursal());
 						$identificador=str_replace($sucAux->getIniciales(),"",$identificador)+1;
 						$identificador=$sucAux->getIniciales().$identificador;
 					}

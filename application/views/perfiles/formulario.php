@@ -16,13 +16,13 @@
         	</div>
         </div>
         <div class="form-group">
-        	<div class="col-sm-6">
+        	<div class="col-sm-12">
         		<fieldset>
         			<legend>Permisos</legend>
         			<?php if($permisos!==false) foreach($permisos as $permiso) PrintPermiso($objeto, $permiso); ?>
         		</fieldset>
         	</div>
-        	<div class="col-sm-6">
+        	<!--<div class="col-sm-6">
         		<fieldset>
         			<legend>Sucursales</legend>
         			<?php if($sucursales!==false) foreach($sucursales as $emp): ?>
@@ -37,7 +37,7 @@
         				<?php endforeach; ?>
         			<?php endforeach; ?>
         		</fieldset>
-        	</div>
+        	</div>-->
         </div>
 		<div class="form-group">
 			<div class="col-sm-8"></div>

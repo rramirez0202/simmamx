@@ -19,6 +19,8 @@ if($archivo!="")
 		$nombre		= $p->getAttribute("titulo");
 		$nombre		= str_replace(" ","_",$nombre)."_".time().".xlsx";
     }
+    if(file_exists($dir_template.$template)==false)
+    	throw new Exception("No esxiste el archivo template: $dir_template$template");
     $libro      	= PHPExcel_IOFactory::load($dir_template.$template);
     foreach($xml->getElementsByTagName("hoja") as $h)
     {
@@ -43,4 +45,6 @@ if($archivo!="")
     $objWriter->save($dir_out.$nombre);
     echo "$path/$nombre";
 }
+else
+	throw new Exception("No se encuentra el archivo xml: ".$_GET["arch"]);
 ?>
